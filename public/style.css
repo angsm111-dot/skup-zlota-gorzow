@@ -26,7 +26,7 @@
 .site-footer>.footer-metals{justify-content:flex-start}
 .footer-metals a{color:#d7b36a;font-weight:700;position:relative;transition:.2s}.footer-metals a:after{content:"";position:absolute;left:0;right:100%;bottom:-4px;height:1px;background:#d7b36a;transition:.2s}.footer-metals a:hover{color:#f0cb80}.footer-metals a:hover:after{right:0}
 .karat{display:inline-flex;margin-left:8px;padding:2px 6px;border:1px solid #d8c18f;border-radius:20px;color:#8c661d;font-size:9px;font-weight:700;vertical-align:2px}.map-art iframe{display:block;width:100%;height:100%;min-height:360px;border:0;filter:saturate(.88) contrast(1.03)}
-.weight input{font-variant-numeric:tabular-nums;padding-right:44px}.weight span{right:auto;pointer-events:none;white-space:nowrap}
+.weight input{font-variant-numeric:tabular-nums;padding-right:44px;font-size:16px;font-weight:500}.weight span{right:auto;top:calc(50% + 4px);transform:translateY(-50%);pointer-events:none;white-space:nowrap;color:var(--ink);font-size:16px;font-weight:500;line-height:1;z-index:2}
 @media(max-width:650px){.site-footer>.footer-metals{display:grid;grid-template-columns:1fr 1fr}}
 
 .mobile-market-bar{display:none}
