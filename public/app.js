@@ -14,8 +14,12 @@ async function loadRates(){
       const payload=await remote.json();
       for(const metal of Object.keys(METALS)){
         const item=payload.metals[metal];
-        metalRates[metal]=Number(item.spot);changes[metal]=Number(item.change||0);histories[metal]=item.history||[];
+        metalRates[metal]=Number(item.spot);changes[metal]=Number(item.change||0);histories[metal]=Array.isArray(item.history)&&item.history.length>1?item.history:makeIndicativeHistory(Number(item.spot),Number(item.change||0),90,metal);
       }
+      try{
+        const nbpResponse=await fetch('https://api.nbp.pl/api/cenyzlota/last/90/?format=json',{cache:'no-store'});
+        if(nbpResponse.ok){const nbpHistory=await nbpResponse.json();if(nbpHistory.length>1)histories.gold=nbpHistory.map(v=>({date:v.data,value:Number(v.cena)}))}
+      }catch(error){console.warn('Historia NBP chwilowo niedostępna — używam wykresu awaryjnego.',error)}
       window.serverPrices=payload.metals;
       renderAll();
       document.querySelector('#updated-at').textContent=`Źródło: ${payload.provider} • ${new Date(payload.fetchedAt).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})}`;
