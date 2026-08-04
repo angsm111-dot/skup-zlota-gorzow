@@ -60,7 +60,7 @@ async function publicPrices(env,ctx){
     }
     metals[key]={name:meta.name,symbol:meta.symbol,spot:round(spot),change,history:market.metals[key]?.history||[],purities};
   }
-  return json({status:"ok",fetchedAt:market.fetchedAt,provider:market.provider,configUpdatedAt:config.updatedAt,metals},200,{"cache-control":"public, max-age=60"});
+  return json({status:"ok",fetchedAt:market.fetchedAt,provider:market.provider,configUpdatedAt:config.updatedAt,metals},200,{"cache-control":"no-store, no-cache, must-revalidate"});
 }
 
 async function refreshMarket(env){
