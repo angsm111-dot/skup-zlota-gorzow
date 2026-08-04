@@ -1,5 +1,5 @@
 const METALS = {
-  gold: { name: "Złoto", symbol: "Au", purities: [999,960,916,750,585,500,375,333], fallback: 337.8 },
+  gold: { name: "Złoto", symbol: "Au", purities: [333,375,500,585,750,916,960,986,999], fallback: 337.8 },
   silver: { name: "Srebro", symbol: "Ag", purities: [999,960,925,900,875,835,830,800], fallback: 3.72 },
   platinum: { name: "Platyna", symbol: "Pt", purities: [999,950,900,850], fallback: 124.6 },
   palladium: { name: "Pallad", symbol: "Pd", purities: [999,950,850,500], fallback: 138.4 }
@@ -21,7 +21,7 @@ const PUBLIC_ROUTES = {
   "/kontakt": "contact"
 };
 const DEFAULT_MARGINS = {
-  gold:{999:7,960:8,916:9,750:11,585:14,500:16,375:20,333:22},
+  gold:{333:22,375:20,500:16,585:14,750:11,916:9,960:8,986:7.5,999:7},
   silver:{999:18,960:19,925:20,900:21,875:22,835:24,830:24,800:26},
   platinum:{999:12,950:13,900:15,850:17},
   palladium:{999:15,950:16,850:19,500:28}
@@ -60,7 +60,7 @@ async function publicPrices(env,ctx){
     }
     metals[key]={name:meta.name,symbol:meta.symbol,spot:round(spot),change,history:market.metals[key]?.history||[],purities};
   }
-  return json({status:"ok",fetchedAt:market.fetchedAt,provider:market.provider,configUpdatedAt:config.updatedAt,metals},200,{"cache-control":"no-store, no-cache, must-revalidate"});
+  return json({status:"ok",fetchedAt:market.fetchedAt,provider:market.provider,configUpdatedAt:config.updatedAt,metals},200,{"cache-control":"no-store, no-cache, must-revalidate, max-age=0","cdn-cache-control":"no-store","cloudflare-cdn-cache-control":"no-store",pragma:"no-cache",expires:"0"});
 }
 
 async function refreshMarket(env){
@@ -158,12 +158,12 @@ async function adminPut(request,env){
   if(!authorized(request,env))return json({error:"Brak dostępu"},401);
   const body=await request.json().catch(()=>null);if(!body?.metals)return json({error:"Nieprawidłowe dane"},400);
   const current=await getConfig(env);
-  for(const [metal,meta] of Object.entries(METALS))for(const purity of meta.purities){const s=body.metals?.[metal]?.[purity];if(!s)continue;current.metals[metal][purity]={margin:clamp(Number(s.margin),0,60),mode:s.mode==="manual"?"manual":"auto",manualPrice:s.mode==="manual"?Math.max(0,Number(s.manualPrice)||0):null};}
+  for(const [metal,meta] of Object.entries(METALS))for(const purity of meta.purities){const s=body.metals?.[metal]?.[purity];if(!s)continue;current.metals[metal][purity]={margin:clamp(Number(s.margin),0,100),mode:s.mode==="manual"?"manual":"auto",manualPrice:s.mode==="manual"?Math.max(0,Number(s.manualPrice)||0):null};}
   current.updatedAt=now();current.updatedBy="panel";await writeJson(env,"config:pricing",current);return json({ok:true,config:current});
 }
 async function adminRefresh(request,env){if(!authorized(request,env))return json({error:"Brak dostępu"},401);return json({ok:true,market:await refreshMarket(env)});}
 function authorized(request,env){const token=request.headers.get("authorization")?.replace(/^Bearer\s+/i,"")||"";return Boolean(env.ADMIN_PASSWORD)&&token===env.ADMIN_PASSWORD}
-async function getConfig(env){const stored=await readJson(env,"config:pricing");if(stored)return stored;const metals={};for(const [key,meta] of Object.entries(METALS)){metals[key]={};for(const purity of meta.purities)metals[key][purity]={margin:DEFAULT_MARGINS[key][purity],mode:"auto",manualPrice:null};}return {updatedAt:now(),updatedBy:"defaults",metals};}
+async function getConfig(env){const stored=await readJson(env,"config:pricing"),metals={};for(const [key,meta] of Object.entries(METALS)){metals[key]={};for(const purity of meta.purities){const saved=stored?.metals?.[key]?.[purity];metals[key][purity]=saved?{margin:clamp(Number(saved.margin),0,100),mode:saved.mode==="manual"?"manual":"auto",manualPrice:saved.mode==="manual"?Math.max(0,Number(saved.manualPrice)||0):null}:{margin:DEFAULT_MARGINS[key][purity],mode:"auto",manualPrice:null}}}return {updatedAt:stored?.updatedAt||now(),updatedBy:stored?.updatedBy||"defaults",metals};}
 async function readJson(env,key){if(!env.PRICE_STORE)return null;const v=await env.PRICE_STORE.get(key);return v?JSON.parse(v):null}
 async function writeJson(env,key,value){if(env.PRICE_STORE)await env.PRICE_STORE.put(key,JSON.stringify(value));}
 function fallbackMarket(){const metals={};for(const [k,v] of Object.entries(METALS))metals[k]={spot:v.fallback,change:0,history:indicativeHistory(v.fallback,k)};return {fetchedAt:now(),provider:"Dane zapasowe",metals}}
