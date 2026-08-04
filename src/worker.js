@@ -12,6 +12,14 @@ const PROVIDER_ALIASES = {
   platinum: ["platinum", "platyna", "pt"],
   palladium: ["palladium", "pallad", "pd"]
 };
+const PUBLIC_ROUTES = {
+  "/cennik": "prices",
+  "/kalkulator": "calculator",
+  "/jak-dzialamy": "process",
+  "/o-nas": "about",
+  "/faq": "faq",
+  "/kontakt": "contact"
+};
 const DEFAULT_MARGINS = {
   gold:{999:7,960:8,916:9,750:11,585:14,500:16,375:20,333:22},
   silver:{999:18,960:19,925:20,900:21,875:22,835:24,830:24,800:26},
@@ -24,6 +32,8 @@ const now=()=>new Date().toISOString();
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
+    const publicRoute=PUBLIC_ROUTES[url.pathname.replace(/\/$/,"")];
+    if(publicRoute&&request.method==="GET")return Response.redirect(`${url.origin}/#${publicRoute}`,302);
     if(url.pathname==="/api/prices"&&request.method==="GET")return publicPrices(env,ctx);
     if(url.pathname==="/api/admin/config"&&request.method==="GET")return adminGet(request,env);
     if(url.pathname==="/api/admin/config"&&request.method==="PUT")return adminPut(request,env);
