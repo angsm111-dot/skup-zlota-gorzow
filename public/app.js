@@ -39,7 +39,7 @@ async function loadRates(){
 function percent(a,b){return b?(a-b)/b*100:0}
 function makeIndicativeHistory(end,change,days,key){const seed={gold:1,silver:2.4,platinum:3.1,palladium:4.2}[key],out=[];for(let i=0;i<days;i++){const drift=(i-days+1)*(change/100/days),wave=Math.sin(i*.48+seed)*.018+Math.cos(i*.17+seed)*.009;const d=new Date();d.setDate(d.getDate()-(days-1-i));out.push({date:d.toISOString().slice(0,10),value:end*(1+drift+wave)});}out[out.length-1].value=end;return out}
 function buyPrice(metal,purity){const server=window.serverPrices?.[metal]?.purities?.[purity]?.price;return Number.isFinite(Number(server))?Number(server):metalRates[metal]*(purity/1000)*METALS[metal].factor}
-function trendMarkup(metal){const up=changes[metal]>=0;return {label:`${up?'↑':'↓'} ${Math.abs(changes[metal]).toFixed(2).replace('.',',')}%`,cls:up?'up':'down'}}
+function trendMarkup(metal){const value=Number(changes[metal]||0);if(Math.abs(value)<.0001)return {label:'→ 0,00%',cls:'flat'};const up=value>0;return {label:`${up?'↑':'↓'} ${Math.abs(value).toFixed(2).replace('.',',')}%`,cls:up?'up':'down'}}
 
 function renderAll(){
   document.querySelectorAll('[data-metal-price]').forEach(el=>el.textContent=`${metalRates[el.dataset.metalPrice].toFixed(2).replace('.',',')} zł/g`);
