@@ -64,9 +64,13 @@ async function publicPrices(env,ctx){
 }
 
 async function refreshMarket(env){
+  const previous=await readJson(env,"market:latest");
   let market;
   if(env.PROVIDER_URL||DEFAULT_PROVIDER_URL)market=await fetchCustomProvider(env);
   else market=await fetchDefaultProviders();
+  for(const [key,item] of Object.entries(market.metals||{})){
+    if(item.change===null||!Number.isFinite(item.change))item.change=previous?.metals?.[key]?.spot?delta(item.spot,previous.metals[key].spot):0;
+  }
   await writeJson(env,"market:latest",market);
   return market;
 }
@@ -86,9 +90,18 @@ async function fetchCustomProvider(env){
     if(!item)continue;
     const spot=extractSpot(item);
     if(!Number.isFinite(spot)||spot<=0)continue;
-    metals[key]={spot,change:Number(item.change_percent??item.changePercent??item.change??0),history:Array.isArray(item.history)?item.history:[]};
+    const suppliedChange=item.change_percent??item.changePercent??item.change;
+    metals[key]={spot,change:suppliedChange==null?null:Number(suppliedChange),history:Array.isArray(item.history)?item.history:[]};
   }
   if(!Object.keys(metals).length)throw new Error("Nie rozpoznano cen w danych dostawcy");
+  if(metals.gold&&metals.gold.history.length<2){
+    try{
+      const goldHistory=await fetch("https://api.nbp.pl/api/cenyzlota/last/90/?format=json").then(check).then(r=>r.json());
+      metals.gold.history=goldHistory.map(x=>({date:x.data,value:Number(x.cena)}));
+      metals.gold.change=delta(goldHistory.at(-1).cena,goldHistory.at(-2).cena);
+    }catch{metals.gold.history=indicativeHistory(metals.gold.spot,"gold")}
+  }
+  for(const [key,item] of Object.entries(metals))if(item.history.length<2)item.history=indicativeHistory(item.spot,key);
   return {fetchedAt:now(),provider:"Invest Gold",metals};
 }
 
