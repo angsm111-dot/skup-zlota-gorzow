@@ -4,6 +4,12 @@
   "main": "src/worker.js",
   "compatibility_date": "2026-08-04",
   "assets": { "directory": "./public", "binding": "ASSETS" },
+  "kv_namespaces": [
+    {
+      "binding": "PRICE_STORE",
+      "id": "f68ca9ff795d42968f384ef81c624618"
+    }
+  ],
   "vars": {
     "CACHE_SECONDS": "300",
     "PROVIDER_URL": "https://investgold.pl/sezamcalc2.json"
