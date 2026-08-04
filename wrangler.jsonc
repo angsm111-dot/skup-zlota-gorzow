@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "skup-zlota-gorzow",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-08-04",
+  "assets": { "directory": "./public", "binding": "ASSETS" },
+  "vars": {
+    "CACHE_SECONDS": "300",
+    "PROVIDER_URL": "https://investgold.pl/sezamcalc2.json"
+  },
+  "triggers": { "crons": ["*/5 * * * *"] }
+}
