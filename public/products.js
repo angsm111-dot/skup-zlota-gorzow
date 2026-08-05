@@ -35,3 +35,21 @@ function formatProductWeight(value){return value>=1000?`${(value/1000).toFixed(v
 async function loadProducts(){try{const response=await fetch(`/api/prices?products=${Date.now()}`,{cache:'no-store'});if(response.ok){const payload=await response.json();if(payload.products)productGroups=payload.products}}catch(error){console.warn('Cennik produktów chwilowo niedostępny.',error)}renderProductPrices();renderProductCalculator();renderItems()}
 
 setupProductPrices();setupProductCalculator();renderProductPrices();renderProductCalculator();loadProducts();setInterval(loadProducts,60000);
+
+function updateProductConditionNotes(){
+  document.querySelectorAll('.product-card').forEach(card=>{
+    const coin=card.querySelector('.product-card-body > small')?.textContent.includes('MONETA');
+    const caption=card.querySelector('.product-card-body > span');
+    const label=coin?'cena za monetę w stanie menniczym':'cena skupu za sztukę';
+    if(caption&&caption.textContent!==label)caption.textContent=label;
+  });
+  const calculator=document.querySelector('#product-calculator');
+  if(calculator&&!calculator.hidden){
+    let note=calculator.querySelector('.product-condition-note');
+    if(calcKind==='coin'&&!note){note=document.createElement('p');note.className='product-condition-note';note.textContent='Podana cena dotyczy monety w stanie menniczym.';calculator.querySelector('.product-fields')?.append(note)}
+    if(calcKind!=='coin'&&note)note.remove();
+  }
+}
+const productConditionObserver=new MutationObserver(updateProductConditionNotes);
+document.querySelectorAll('#product-price-view,#product-calculator').forEach(element=>productConditionObserver.observe(element,{childList:true,subtree:true}));
+updateProductConditionNotes();
