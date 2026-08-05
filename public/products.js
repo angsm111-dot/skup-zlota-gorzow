@@ -16,9 +16,9 @@ const PRODUCT_FALLBACK={
 };
 let productGroups=structuredClone(PRODUCT_FALLBACK),priceKind='purities',priceProductMetal='gold',calcKind='purities',calcProductMetal='gold';
 const productMoney=value=>new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN'}).format(value);
-const productGroup=(metal,kind)=>productGroups[`${metal}${kind==='coin'?'Coins':'Bars'}`]||[];
+const productGroup=(metal,kind)=>(productGroups[`${metal}${kind==='coin'?'Coins':'Bars'}`]||[]).filter(product=>product.active!==false);
 const productPrice=product=>Number.isFinite(Number(product.price))?Number(product.price):metalRates[product.metal]*product.fineWeight*(1-Number(product.margin||0)/100);
-const productImageStyle=product=>product.kind==='coin'?`--product-image:url('assets/${product.metal}-coins-catalog.webp');--product-size:400% 100%;--product-position:${product.imageIndex/3*100}% center`:`--product-image:url('assets/bars-catalog.webp');--product-size:200% 100%;--product-position:${product.metal==='gold'?0:100}% center`;
+const productImageStyle=product=>product.imageData?`--product-image:url('${product.imageData}');--product-size:contain;--product-position:center`:(product.kind==='coin'?`--product-image:url('assets/${product.metal}-coins-catalog.webp');--product-size:400% 100%;--product-position:${product.imageIndex/3*100}% center`:`--product-image:url('assets/bars-catalog.webp');--product-size:200% 100%;--product-position:${product.metal==='gold'?0:100}% center`);
 
 function productTabs(type){return `<div class="catalog-tabs" data-catalog-tabs="${type}"><button data-kind="purities" class="active">Rodzaj metalu</button><button data-kind="coin">Monety</button><button data-kind="bar">Sztabki</button></div>`}
 function metalSwitch(type,active){return `<div class="catalog-metal-switch" data-catalog-metal="${type}"><button data-product-metal="gold" class="${active==='gold'?'active':''}">Au <span>Złoto</span></button><button data-product-metal="silver" class="${active==='silver'?'active':''}">Ag <span>Srebro</span></button></div>`}
