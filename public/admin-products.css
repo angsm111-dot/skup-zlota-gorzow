@@ -1,0 +1,37 @@
+@import url("admin-v6.css");
+
+.admin-kinds {
+  display: flex;
+  gap: 1px;
+  padding: 14px 7vw 0;
+  background: #fff;
+  border-top: 1px solid var(--line);
+}
+
+.admin-kinds[hidden] { display: none; }
+
+.admin-kinds button {
+  min-width: 145px;
+  padding: 11px 16px;
+  border: 1px solid var(--line);
+  background: #f7f4ed;
+  color: #5d5a52;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.admin-kinds button.active {
+  border-color: #c89a42;
+  background: #c89a42;
+  color: #171715;
+}
+
+td:first-child { min-width: 190px; }
+td:first-child small,
+td:nth-child(2) small { color: #777; line-height: 1.45; }
+.live-price { width: 125px; }
+
+@media(max-width:750px){
+  .admin-kinds { padding: 12px 5vw 0; overflow-x: auto; }
+  .admin-kinds button { min-width: 120px; }
+}

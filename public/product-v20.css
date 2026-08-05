@@ -1,0 +1,190 @@
+@import url("site-v19.css");
+
+.metal-tabs[hidden],
+.content-grid[hidden],
+.product-price-view[hidden],
+.product-calculator[hidden],
+.calc-card > [hidden] {
+  display: none !important;
+}
+
+.catalog-tabs {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(130px,190px));
+  gap: 1px;
+  margin: 0 7vw 24px;
+  background: var(--line);
+  width: max-content;
+  max-width: calc(100% - 14vw);
+}
+
+.calc-card > .catalog-tabs {
+  width: 100%;
+  max-width: none;
+  margin: 0 0 18px;
+  grid-template-columns: repeat(3,1fr);
+}
+
+.catalog-tabs button,
+.catalog-metal-switch button {
+  border: 0;
+  background: #fff;
+  color: #706e67;
+  padding: 13px 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.catalog-tabs button.active,
+.catalog-metal-switch button.active {
+  background: #171715;
+  color: #e2b65f;
+}
+
+.product-price-view {
+  padding: 0 7vw 100px;
+}
+
+.catalog-metal-switch {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(130px,190px));
+  gap: 1px;
+  width: max-content;
+  margin-bottom: 34px;
+  background: var(--line);
+}
+
+.catalog-metal-switch button {
+  font: 700 19px var(--serif);
+}
+
+.catalog-metal-switch button span {
+  display: block;
+  margin-top: 1px;
+  font: 600 11px var(--sans);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.product-price-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: end;
+  gap: 8vw;
+  margin-bottom: 34px;
+}
+
+.product-price-head .eyebrow {
+  margin-bottom: 8px;
+}
+
+.product-price-head h2 {
+  margin: 0;
+  font: 600 clamp(32px,4vw,52px)/1.08 var(--serif);
+  letter-spacing: -.04em;
+}
+
+.product-price-head > p {
+  color: var(--muted);
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 16px;
+}
+
+.product-card {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e6e2d8;
+}
+
+.product-photo {
+  height: 220px;
+  background-image: var(--product-image);
+  background-size: var(--product-size);
+  background-position: var(--product-position);
+  background-repeat: no-repeat;
+}
+
+.product-card-body {
+  padding: 22px;
+}
+
+.product-card-body > small {
+  color: #987124;
+  font-size: 9px;
+  letter-spacing: .1em;
+}
+
+.product-card h3 {
+  min-height: 55px;
+  margin: 8px 0 16px;
+  font: 600 20px/1.25 var(--serif);
+}
+
+.product-card dl {
+  margin: 0 0 20px;
+  border-top: 1px solid var(--line);
+}
+
+.product-card dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 11px;
+}
+
+.product-card dt { color: var(--muted); }
+.product-card dd { margin: 0; font-weight: 700; }
+.product-card-body > strong { display: block; color: #8d661c; font-size: 22px; }
+.product-card-body > span { color: var(--muted); font-size: 10px; }
+
+.product-calculator .catalog-metal-switch {
+  width: 100%;
+  grid-template-columns: 1fr 1fr;
+  margin: 0 0 18px;
+}
+
+.product-calc-layout {
+  display: grid;
+  grid-template-columns: .8fr 1.2fr;
+  gap: 22px;
+  padding: 20px;
+  background: #f4f1e9;
+}
+
+.product-preview {
+  overflow: hidden;
+  min-height: 270px;
+  background: #fff;
+}
+
+.product-preview .product-photo { height: 100%; min-height: 270px; }
+.product-fields label { display: block; font-size: 12px; font-weight: 600; }
+.product-fields select,
+.product-fields input { width: 100%; margin-top: 7px; padding: 13px; border: 1px solid var(--line); background: #fff; }
+.product-fields .btn { width: 100%; margin-top: 18px; }
+.product-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0; }
+.product-facts span { padding: 11px; background: #fff; color: var(--muted); font-size: 10px; }
+.product-facts b { display: block; color: var(--ink); font-size: 13px; }
+
+@media (max-width: 1050px) {
+  .product-grid { grid-template-columns: repeat(2,1fr); }
+}
+
+@media (max-width: 720px) {
+  .catalog-tabs { width: calc(100% - 10vw); max-width: none; margin: 0 5vw 20px; grid-template-columns: repeat(3,1fr); }
+  .calc-card > .catalog-tabs { width: 100%; margin: 0 0 16px; }
+  .catalog-tabs button { padding: 11px 7px; font-size: 11px; }
+  .product-price-view { padding: 0 5vw 70px; }
+  .product-price-head { grid-template-columns: 1fr; gap: 10px; }
+  .product-grid { grid-template-columns: 1fr; }
+  .product-photo { height: 250px; }
+  .product-calc-layout { grid-template-columns: 1fr; padding: 14px; }
+  .product-preview { min-height: 230px; }
+  .product-preview .product-photo { min-height: 230px; }
+}
