@@ -4,6 +4,22 @@ const METALS = {
   platinum: { name: "Platyna", symbol: "Pt", purities: [999,950,900,850], fallback: 124.6 },
   palladium: { name: "Pallad", symbol: "Pd", purities: [999,950,850,500], fallback: 138.4 }
 };
+const PRODUCTS = {
+  goldCoins: [
+    {id:"gold-krugerrand-1oz",name:"Krugerrand 1 oz",metal:"gold",kind:"coin",purity:916.7,grossWeight:33.9305,fineWeight:31.1035,imageIndex:0,defaultMargin:4},
+    {id:"gold-maple-leaf-1oz",name:"Maple Leaf 1 oz",metal:"gold",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:1,defaultMargin:3.5},
+    {id:"gold-philharmonic-1oz",name:"Filharmonik 1 oz",metal:"gold",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:2,defaultMargin:3.5},
+    {id:"gold-britannia-1oz",name:"Britannia 1 oz",metal:"gold",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:3,defaultMargin:3.5}
+  ],
+  silverCoins: [
+    {id:"silver-maple-leaf-1oz",name:"Maple Leaf 1 oz",metal:"silver",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:0,defaultMargin:14},
+    {id:"silver-philharmonic-1oz",name:"Filharmonik 1 oz",metal:"silver",kind:"coin",purity:999,grossWeight:31.1035,fineWeight:31.0724,imageIndex:1,defaultMargin:15},
+    {id:"silver-britannia-1oz",name:"Britannia 1 oz",metal:"silver",kind:"coin",purity:999,grossWeight:31.1035,fineWeight:31.0724,imageIndex:2,defaultMargin:15},
+    {id:"silver-krugerrand-1oz",name:"Krugerrand 1 oz",metal:"silver",kind:"coin",purity:999,grossWeight:31.1035,fineWeight:31.0724,imageIndex:3,defaultMargin:15}
+  ],
+  goldBars: [1,2.5,5,10,20,31.1035,50,100].map(weight=>({id:`gold-bar-${String(weight).replace(".","-")}g`,name:weight===31.1035?"Sztabka 1 oz":"Sztabka "+String(weight).replace(".",",")+" g",metal:"gold",kind:"bar",purity:999.9,grossWeight:weight,fineWeight:weight*.9999,imageIndex:0,defaultMargin:3})),
+  silverBars: [50,100,250,500,1000].map(weight=>({id:`silver-bar-${weight}g`,name:weight===1000?"Sztabka 1 kg":"Sztabka "+weight+" g",metal:"silver",kind:"bar",purity:999,grossWeight:weight,fineWeight:weight*.999,imageIndex:1,defaultMargin:12}))
+};
 const SYMBOLS = { silver: "XAG", platinum: "XPT", palladium: "XPD" };
 const DEFAULT_PROVIDER_URL = "https://investgold.pl/sezamcalc2.json";
 const PROVIDER_ALIASES = {
@@ -60,7 +76,9 @@ async function publicPrices(env,ctx){
     }
     metals[key]={name:meta.name,symbol:meta.symbol,spot:round(spot),change,history:market.metals[key]?.history||[],purities};
   }
-  return json({status:"ok",fetchedAt:market.fetchedAt,provider:market.provider,configUpdatedAt:config.updatedAt,metals},200,{"cache-control":"no-store, no-cache, must-revalidate, max-age=0","cdn-cache-control":"no-store","cloudflare-cdn-cache-control":"no-store",pragma:"no-cache",expires:"0"});
+  const products={};
+  for(const [group,list] of Object.entries(PRODUCTS))products[group]=list.map(product=>{const setting=config.products[product.id],spot=Number(market.metals[product.metal]?.spot||METALS[product.metal].fallback),marketValue=spot*product.fineWeight,auto=marketValue*(1-setting.margin/100);return {...product,marketValue:round(marketValue),price:round(setting.mode==="manual"&&setting.manualPrice!==null?setting.manualPrice:auto),margin:setting.margin,mode:setting.mode}});
+  return json({status:"ok",fetchedAt:market.fetchedAt,provider:market.provider,configUpdatedAt:config.updatedAt,metals,products},200,{"cache-control":"no-store, no-cache, must-revalidate, max-age=0","cdn-cache-control":"no-store","cloudflare-cdn-cache-control":"no-store",pragma:"no-cache",expires:"0"});
 }
 
 async function refreshMarket(env){
@@ -68,9 +86,10 @@ async function refreshMarket(env){
   let market;
   if(env.PROVIDER_URL||DEFAULT_PROVIDER_URL)market=await fetchCustomProvider(env);
   else market=await fetchDefaultProviders();
-  for(const [key,item] of Object.entries(market.metals||{})){
-    if(item.change===null||!Number.isFinite(item.change))item.change=previous?.metals?.[key]?.spot?delta(item.spot,previous.metals[key].spot):0;
-  }
+  const marketDate=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Warsaw"}).format(new Date()),storedAnchor=await readJson(env,"market:day-anchor");
+  let anchor=storedAnchor;
+  if(!anchor||anchor.date!==marketDate){const metals={};for(const [key,item] of Object.entries(market.metals||{}))metals[key]=Number(previous?.metals?.[key]?.spot||item.spot);anchor={date:marketDate,metals};await writeJson(env,"market:day-anchor",anchor)}
+  for(const [key,item] of Object.entries(market.metals||{}))item.change=delta(item.spot,Number(anchor.metals?.[key]||item.spot));
   await writeJson(env,"market:latest",market);
   return market;
 }
@@ -159,11 +178,12 @@ async function adminPut(request,env){
   const body=await request.json().catch(()=>null);if(!body?.metals)return json({error:"Nieprawidłowe dane"},400);
   const current=await getConfig(env);
   for(const [metal,meta] of Object.entries(METALS))for(const purity of meta.purities){const s=body.metals?.[metal]?.[purity];if(!s)continue;current.metals[metal][purity]={margin:clamp(Number(s.margin),0,100),mode:s.mode==="manual"?"manual":"auto",manualPrice:s.mode==="manual"?Math.max(0,Number(s.manualPrice)||0):null};}
+  for(const list of Object.values(PRODUCTS))for(const product of list){const s=body.products?.[product.id];if(!s)continue;current.products[product.id]={margin:clamp(Number(s.margin),0,100),mode:s.mode==="manual"?"manual":"auto",manualPrice:s.mode==="manual"?Math.max(0,Number(s.manualPrice)||0):null};}
   current.updatedAt=now();current.updatedBy="panel";await writeJson(env,"config:pricing",current);return json({ok:true,config:current});
 }
 async function adminRefresh(request,env){if(!authorized(request,env))return json({error:"Brak dostępu"},401);return json({ok:true,market:await refreshMarket(env)});}
 function authorized(request,env){const token=request.headers.get("authorization")?.replace(/^Bearer\s+/i,"")||"";return Boolean(env.ADMIN_PASSWORD)&&token===env.ADMIN_PASSWORD}
-async function getConfig(env){const stored=await readJson(env,"config:pricing"),metals={};for(const [key,meta] of Object.entries(METALS)){metals[key]={};for(const purity of meta.purities){const saved=stored?.metals?.[key]?.[purity];metals[key][purity]=saved?{margin:clamp(Number(saved.margin),0,100),mode:saved.mode==="manual"?"manual":"auto",manualPrice:saved.mode==="manual"?Math.max(0,Number(saved.manualPrice)||0):null}:{margin:DEFAULT_MARGINS[key][purity],mode:"auto",manualPrice:null}}}return {updatedAt:stored?.updatedAt||now(),updatedBy:stored?.updatedBy||"defaults",metals};}
+async function getConfig(env){const stored=await readJson(env,"config:pricing"),metals={},products={};for(const [key,meta] of Object.entries(METALS)){metals[key]={};for(const purity of meta.purities){const saved=stored?.metals?.[key]?.[purity];metals[key][purity]=saved?{margin:clamp(Number(saved.margin),0,100),mode:saved.mode==="manual"?"manual":"auto",manualPrice:saved.mode==="manual"?Math.max(0,Number(saved.manualPrice)||0):null}:{margin:DEFAULT_MARGINS[key][purity],mode:"auto",manualPrice:null}}}for(const list of Object.values(PRODUCTS))for(const product of list){const saved=stored?.products?.[product.id];products[product.id]=saved?{margin:clamp(Number(saved.margin),0,100),mode:saved.mode==="manual"?"manual":"auto",manualPrice:saved.mode==="manual"?Math.max(0,Number(saved.manualPrice)||0):null}:{margin:product.defaultMargin,mode:"auto",manualPrice:null}}return {updatedAt:stored?.updatedAt||now(),updatedBy:stored?.updatedBy||"defaults",metals,products};}
 async function readJson(env,key){if(!env.PRICE_STORE)return null;const v=await env.PRICE_STORE.get(key);return v?JSON.parse(v):null}
 async function writeJson(env,key,value){if(env.PRICE_STORE)await env.PRICE_STORE.put(key,JSON.stringify(value));}
 function fallbackMarket(){const metals={};for(const [k,v] of Object.entries(METALS))metals[k]={spot:v.fallback,change:0,history:indicativeHistory(v.fallback,k)};return {fetchedAt:now(),provider:"Dane zapasowe",metals}}
