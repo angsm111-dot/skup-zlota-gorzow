@@ -58,8 +58,8 @@ export default {
     if(url.pathname==="/api/admin/config"&&request.method==="GET")return adminGet(request,env);
     if(url.pathname==="/api/admin/config"&&request.method==="PUT")return adminPut(request,env);
     if(url.pathname==="/api/admin/refresh"&&request.method==="POST")return adminRefresh(request,env);
-    if(url.pathname==="/admin"||url.pathname==="/admin/"){const target=new URL(request.url);target.pathname="/admin.html";return env.ASSETS.fetch(new Request(target.toString(),{method:"GET",headers:request.headers}));}
-    return env.ASSETS.fetch(request);
+    if(url.pathname==="/admin"||url.pathname==="/admin/"){const target=new URL(request.url);target.pathname="/admin.html";return serveAsset(env,new Request(target.toString(),{method:"GET",headers:request.headers}));}
+    return serveAsset(env,request);
   },
   async scheduled(_event,env,ctx){ctx.waitUntil(refreshMarket(env));}
 };
@@ -83,6 +83,13 @@ async function publicPrices(env,ctx){
   const products={};
   for(const [group,list] of Object.entries(allProductGroups(config)))products[group]=list.map(product=>{const setting=config.products[product.id],spot=Number(market.metals[product.metal]?.spot||METALS[product.metal].fallback),marketValue=spot*product.fineWeight,auto=marketValue*(1-setting.margin/100);return {...product,marketValue:round(marketValue),price:round(setting.mode==="manual"&&setting.manualPrice!==null?setting.manualPrice:auto),margin:setting.margin,mode:setting.mode}});
   return json({status:"ok",fetchedAt:market.fetchedAt,provider:market.provider,configUpdatedAt:config.updatedAt,metals,products},200,{"cache-control":"no-store, no-cache, must-revalidate, max-age=0","cdn-cache-control":"no-store","cloudflare-cdn-cache-control":"no-store",pragma:"no-cache",expires:"0"});
+}
+
+async function serveAsset(env,request){
+  const response=await env.ASSETS.fetch(request),url=new URL(request.url),headers=new Headers(response.headers);
+  const dynamicAsset=url.pathname==="/"||/\.(?:html|js|css)$/i.test(url.pathname);
+  if(dynamicAsset){headers.set("cache-control","no-store, no-cache, must-revalidate, max-age=0");headers.set("cdn-cache-control","no-store");headers.set("cloudflare-cdn-cache-control","no-store");headers.set("pragma","no-cache");headers.set("expires","0")}
+  return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
 }
 
 async function refreshMarket(env){
