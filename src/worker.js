@@ -48,10 +48,15 @@ const DEFAULT_MARGINS = {
 };
 const json=(body,status=200,headers={})=>new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...headers}});
 const now=()=>new Date().toISOString();
+const SITE_VERSION="20260806-2";
 
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
+    if(request.method==="GET"&&url.pathname==="/"&&!url.searchParams.has("wersja")){
+      url.searchParams.set("wersja",SITE_VERSION);
+      return new Response(null,{status:302,headers:{location:url.toString(),"cache-control":"no-store, no-cache, must-revalidate, max-age=0",pragma:"no-cache",expires:"0"}});
+    }
     const publicRoute=PUBLIC_ROUTES[url.pathname.replace(/\/$/,"")];
     if(publicRoute&&request.method==="GET")return Response.redirect(`${url.origin}/#${publicRoute}`,302);
     if(url.pathname==="/api/prices"&&request.method==="GET")return publicPrices(env,ctx);
