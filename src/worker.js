@@ -48,7 +48,7 @@ const DEFAULT_MARGINS = {
 };
 const json=(body,status=200,headers={})=>new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...headers}});
 const now=()=>new Date().toISOString();
-const SITE_VERSION="20260806-2";
+const SITE_VERSION="20260806-3";
 
 export default {
   async fetch(request,env,ctx){
@@ -202,8 +202,23 @@ async function adminRefresh(request,env){if(!authorized(request,env))return json
 function authorized(request,env){const token=request.headers.get("authorization")?.replace(/^Bearer\s+/i,"")||"";return Boolean(env.ADMIN_PASSWORD)&&token===env.ADMIN_PASSWORD}
 async function getConfig(env){const stored=await readJson(env,"config:pricing"),metals={},products={},customProducts=sanitizeCustomProducts(stored?.customProducts);for(const [key,meta] of Object.entries(METALS)){metals[key]={};for(const purity of meta.purities){const saved=stored?.metals?.[key]?.[purity];metals[key][purity]=saved?{margin:clamp(Number(saved.margin),0,100),mode:saved.mode==="manual"?"manual":"auto",manualPrice:saved.mode==="manual"?Math.max(0,Number(saved.manualPrice)||0):null}:{margin:DEFAULT_MARGINS[key][purity],mode:"auto",manualPrice:null}}}for(const list of Object.values(allProductGroups({customProducts})))for(const product of list){const saved=stored?.products?.[product.id];products[product.id]=saved?{margin:clamp(Number(saved.margin),0,100),mode:saved.mode==="manual"?"manual":"auto",manualPrice:saved.mode==="manual"?Math.max(0,Number(saved.manualPrice)||0):null}:{margin:product.defaultMargin??10,mode:"auto",manualPrice:null}}return {updatedAt:stored?.updatedAt||now(),updatedBy:stored?.updatedBy||"defaults",metals,products,customProducts};}
 
-function sanitizeCustomProducts(input){return (Array.isArray(input)?input:[]).slice(0,30).map((item,index)=>{const allowedMetals=["gold","silver","platinum","palladium"],metal=allowedMetals.includes(item?.metal)?item.metal:"gold",kind=item?.kind==="bar"?"bar":"coin",purity=clamp(Number(item?.purity),1,999.9),grossWeight=clamp(Number(item?.grossWeight),.01,100000),calculatedFine=grossWeight*(purity/1000),fineWeight=clamp(Number(item?.fineWeight)||calculatedFine,.001,grossWeight),rawImage=String(item?.imageData||"");const imageData=/^data:image\/(?:webp|jpeg|png);base64,/i.test(rawImage)&&rawImage.length<=500000?rawImage:"";return {id:String(item?.id||`custom-${Date.now()}-${index}`).replace(/[^a-z0-9_-]/gi,"-").slice(0,80),name:String(item?.name||"Produkt bez nazwy").replace(/[<>&\"]/g,"").trim().slice(0,100),metal,kind,purity:round(purity),grossWeight:round(grossWeight),fineWeight:round(fineWeight),imageData,active:item?.active!==false,custom:true,defaultMargin:clamp(Number(item?.defaultMargin??10),0,100)}}).filter(item=>item.name&&item.imageData)}
-function allProductGroups(config){const groups=Object.fromEntries(Object.entries(PRODUCTS).map(([key,list])=>[key,[...list]]));for(const product of config?.customProducts||[]){const group=`${product.metal}${product.kind==="coin"?"Coins":"Bars"}`;if(groups[group])groups[group].push(product)}return groups}
+function sanitizeCustomProducts(input){
+  const baseIds=new Set(Object.values(PRODUCTS).flat().map(product=>product.id));
+  return (Array.isArray(input)?input:[]).slice(0,40).map((item,index)=>{
+    const allowedMetals=["gold","silver","platinum","palladium"],metal=allowedMetals.includes(item?.metal)?item.metal:"gold",kind=item?.kind==="bar"?"bar":"coin",purity=clamp(Number(item?.purity),1,999.9),grossWeight=clamp(Number(item?.grossWeight),.01,100000),calculatedFine=grossWeight*(purity/1000),fineWeight=clamp(Number(item?.fineWeight)||calculatedFine,.001,grossWeight),rawImage=String(item?.imageData||""),id=String(item?.id||`custom-${Date.now()}-${index}`).replace(/[^a-z0-9_-]/gi,"-").slice(0,80),builtIn=baseIds.has(id);
+    const imageData=/^data:image\/(?:webp|jpeg|png);base64,/i.test(rawImage)&&rawImage.length<=500000?rawImage:"";
+    return {id,name:String(item?.name||"Produkt bez nazwy").replace(/[<>&\"]/g,"").trim().slice(0,100),description:String(item?.description||"").replace(/[<>&]/g,"").trim().slice(0,300),metal,kind,purity:round(purity),grossWeight:round(grossWeight),fineWeight:round(fineWeight),imageData,imageIndex:clamp(Number(item?.imageIndex)||0,0,20),active:item?.active!==false,custom:!builtIn,overridden:builtIn,defaultMargin:clamp(Number(item?.defaultMargin??10),0,100)};
+  }).filter(item=>item.name&&(item.imageData||item.overridden));
+}
+function allProductGroups(config){
+  const groups=Object.fromEntries(Object.entries(PRODUCTS).map(([key,list])=>[key,list.map(product=>({...product,description:product.description||"",custom:false,overridden:false,active:true}))]));
+  for(const product of config?.customProducts||[]){
+    const group=`${product.metal}${product.kind==="coin"?"Coins":"Bars"}`;if(!groups[group])continue;
+    const existing=groups[group].findIndex(item=>item.id===product.id);
+    if(existing>=0)groups[group][existing]={...groups[group][existing],...product,custom:false,overridden:true};else groups[group].push(product);
+  }
+  return groups;
+}
 async function readJson(env,key){if(!env.PRICE_STORE)return null;const v=await env.PRICE_STORE.get(key);return v?JSON.parse(v):null}
 async function writeJson(env,key,value){if(env.PRICE_STORE)await env.PRICE_STORE.put(key,JSON.stringify(value));}
 function fallbackMarket(){const metals={};for(const [k,v] of Object.entries(METALS))metals[k]={spot:v.fallback,change:0,history:indicativeHistory(v.fallback,k)};return {fetchedAt:now(),provider:"Dane zapasowe",metals}}
