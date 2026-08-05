@@ -39,7 +39,11 @@ async function loadProducts(){try{const response=await fetch(`/api/prices?produc
 setupProductPrices();setupProductCalculator();renderProductPrices();renderProductCalculator();loadProducts();setInterval(loadProducts,60000);
 
 function updateProductConditionNotes(){
-  document.querySelectorAll('.product-card').forEach(card=>{
+  const visibleProducts=productGroup(priceProductMetal,priceKind);
+  document.querySelectorAll('.product-card').forEach((card,index)=>{
+    const product=visibleProducts[index],heading=card.querySelector('h3');let description=card.querySelector('.product-description');
+    if(product?.description&&!description){description=document.createElement('p');description.className='product-description';heading?.after(description)}
+    if(description){description.textContent=product?.description||'';description.hidden=!product?.description}
     const coin=card.querySelector('.product-card-body > small')?.textContent.includes('MONETA');
     const caption=card.querySelector('.product-card-body > span');
     const label=coin?'cena za monetę w stanie menniczym':'cena skupu za sztukę';
