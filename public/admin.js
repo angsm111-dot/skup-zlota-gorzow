@@ -13,7 +13,7 @@ function render(){
   const tabs=$('#tabs');
   tabs.innerHTML=Object.entries(names).map(([key,name])=>`<button data-metal="${key}" class="${key===active?'active':''}">${name[0]}<span>${name[1]}</span></button>`).join('');
   tabs.querySelectorAll('button').forEach(button=>button.onclick=()=>{active=button.dataset.metal;if(!['gold','silver'].includes(active))kind='purities';render()});
-  const kinds=ensureKinds(),hasProducts=['gold','silver'].includes(active);
+  const kinds=ensureKinds(),hasProducts=true;
   kinds.hidden=!hasProducts;
   kinds.innerHTML=hasProducts?`<button data-kind="purities" class="${kind==='purities'?'active':''}">Próby metalu</button><button data-kind="coins" class="${kind==='coins'?'active':''}">Monety</button><button data-kind="bars" class="${kind==='bars'?'active':''}">Sztabki</button>`:'';
   kinds.querySelectorAll('button').forEach(button=>button.onclick=()=>{kind=button.dataset.kind;render()});
