@@ -48,7 +48,7 @@ const DEFAULT_MARGINS = {
 };
 const json=(body,status=200,headers={})=>new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...headers}});
 const now=()=>new Date().toISOString();
-const SITE_VERSION="20260806-7";
+const SITE_VERSION="20260807-1";
 
 export default {
   async fetch(request,env,ctx){
