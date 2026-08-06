@@ -48,7 +48,7 @@ if(heroActions&&!document.querySelector('.cash-now-note'))heroActions.insertAdja
 const jewelryCard=document.querySelector('.sell-grid a:first-child p');
 if(jewelryCard&&!document.querySelector('.jewelry-premium-inline'))jewelryCard.insertAdjacentHTML('afterend','<p class="jewelry-premium-inline"><b>Ważne:</b> za nieuszkodzoną biżuterię możesz otrzymać znacznie więcej niż wynosi cena samego złomu.</p>');
 const calcLive=document.querySelector('.calc-live');
-if(calcLive&&!document.querySelector('.jewelry-premium-note'))calcLive.insertAdjacentHTML('afterend','<div class="jewelry-premium-note"><b>Masz biżuterię w dobrym stanie?</b> Nie wyceniaj jej wyłącznie jak złomu — za nieuszkodzony wyrób możesz otrzymać znacznie więcej.</div>');
+if(calcLive&&!document.querySelector('.jewelry-premium-note'))calcLive.insertAdjacentHTML('afterend','<div class="jewelry-premium-note"><b>Masz biżuterię w dobrym stanie?</b> Otrzymasz za nią więcej niż w cenniku.</div>');
 const values=document.querySelector('.values');
 if(values&&!document.querySelector('.valuation-promises'))values.insertAdjacentHTML('afterend','<div class="valuation-promises"><span><b>Biżuteria w dobrym stanie</b> może być warta znacznie więcej niż złom</span><span><b>Gotówka od ręki</b> po zaakceptowaniu wyceny</span></div>');
 
