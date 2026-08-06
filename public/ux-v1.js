@@ -5,6 +5,13 @@ if(uxWeight){
   uxWeight.addEventListener('blur',()=>{if(uxWeight.value===''){uxWeight.value='0';uxWeight.dispatchEvent(new Event('input',{bubbles:true}))}});
 }
 
+// Każde wybranie pozycji w menu mobilnym zamyka menu, także gdy użytkownik
+// wybiera ponownie tę samą, aktualnie otwartą podstronę.
+document.querySelectorAll('.topbar nav a').forEach(link=>link.addEventListener('click',()=>{
+  document.querySelector('.topbar nav')?.classList.remove('open');
+  document.querySelector('.menu-toggle')?.setAttribute('aria-expanded','false');
+},true));
+
 document.querySelectorAll('[data-footer-metal]').forEach(link=>link.addEventListener('click',event=>{
   event.preventDefault();event.stopImmediatePropagation();const metal=link.dataset.footerMetal;location.hash='prices';
   setTimeout(()=>{
@@ -39,9 +46,40 @@ renderProductCalculator=function(){
   const card=document.querySelector('.calc-card'),view=card.querySelector('#product-calculator'),standard=[card.querySelector('.metal-selector'),card.querySelector('.field-row'),card.querySelector('.calc-live'),card.querySelector('.calc-hint'),card.querySelector('#add-item')],showProducts=calcKind!=='purities';standard.forEach(element=>element.hidden=showProducts);view.hidden=!showProducts;if(!showProducts){uxProductContext='';uxSelectedProduct='';return}
   const context=`${calcKind}:${calcProductMetal}`;if(context!==uxProductContext){uxProductContext=context;uxSelectedProduct=''}
   const list=productGroup(calcProductMetal,calcKind),selected=list.find(item=>item.id===uxSelectedProduct),label=calcKind==='coin'?'monetę':'sztabkę';
-  view.innerHTML=`${metalSwitch('calculator',calcProductMetal)}<p class="product-picker-label">Najpierw wybierz ${label} z listy</p><div class="product-calc-layout ${selected?'has-selection':'awaiting-selection'}"><div class="product-preview">${selected?`<div class="product-photo" style="${productImageStyle(selected)}"></div>`:`<div class="product-empty"><span>${calcKind==='coin'?'◯':'▭'}</span><strong>Wybierz ${label}</strong><small>Zdjęcie i cena pojawią się po wyborze produktu.</small></div>`}</div><div class="product-fields"><label>Wybierz ${label}<select id="catalog-product" class="${selected?'':'attention-select'}"><option value="">— Wybierz ${label} —</option>${list.map(product=>`<option value="${product.id}" ${product.id===uxSelectedProduct?'selected':''}>${product.name} — próba ${String(product.purity).replace('.',',')}</option>`).join('')}</select></label>${selected?`<div class="product-facts"><span>Czysty metal <b>${formatProductWeight(selected.fineWeight)}</b></span><span>Cena za sztukę <b>${productMoney(productPrice(selected))}</b></span></div><label>Liczba sztuk<input id="catalog-quantity" type="number" min="1" step="1" value="1"></label><button type="button" id="add-product" class="btn dark-btn">+ Dodaj do wyceny</button>`:`<div class="product-choice-hint">Wybór produktu jest wymagany przed dodaniem pozycji do wyceny.</div>`}</div></div>`;
+  view.innerHTML=`${metalSwitch('calculator',calcProductMetal)}<p class="product-picker-label">Najpierw wybierz ${label} z listy</p><div class="product-calc-layout ${selected?'has-selection':'awaiting-selection'}"><div class="product-preview">${selected?`<div class="product-photo" style="${productImageStyle(selected)}"></div>`:`<div class="product-empty" role="button" tabindex="0"><span>${calcKind==='coin'?'◯':'▭'}</span><strong>Wybierz ${label}</strong><small>Kliknij tutaj, aby rozwinąć listę produktów.</small></div>`}</div><div class="product-fields"><label>Wybierz ${label}<select id="catalog-product" class="${selected?'':'attention-select'}"><option value="">— Wybierz ${label} —</option>${list.map(product=>`<option value="${product.id}" ${product.id===uxSelectedProduct?'selected':''}>${product.name} — próba ${String(product.purity).replace('.',',')}</option>`).join('')}</select></label>${selected?`<div class="product-facts"><span>Czysty metal <b>${formatProductWeight(selected.fineWeight)}</b></span><span>Cena za sztukę <b>${productMoney(productPrice(selected))}</b></span></div><label>Liczba sztuk<input id="catalog-quantity" type="number" min="1" step="1" value="1"></label><button type="button" id="add-product" class="btn dark-btn">+ Dodaj do wyceny</button>`:`<div class="product-choice-hint">Wybór produktu jest wymagany przed dodaniem pozycji do wyceny.</div>`}</div></div>`;
   view.querySelector('[data-catalog-metal="calculator"]').addEventListener('click',event=>{const button=event.target.closest('button');if(!button||button.disabled)return;calcProductMetal=button.dataset.productMetal;uxSelectedProduct='';renderProductCalculator()});
-  view.querySelector('#catalog-product').addEventListener('change',event=>{uxSelectedProduct=event.target.value;renderProductCalculator()});
+  const productSelect=view.querySelector('#catalog-product');
+  productSelect.addEventListener('change',event=>{uxSelectedProduct=event.target.value;renderProductCalculator()});
+  view.querySelector('.product-empty')?.addEventListener('click',()=>{
+    productSelect.focus();
+    if(typeof productSelect.showPicker==='function'){try{productSelect.showPicker()}catch{productSelect.click()}}else productSelect.click();
+  });
+  view.querySelector('.product-empty')?.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.currentTarget.click()}});
   view.querySelector('#add-product')?.addEventListener('click',()=>{const product=productGroup(calcProductMetal,calcKind).find(item=>item.id===uxSelectedProduct),quantity=Math.max(1,Math.floor(Number(view.querySelector('#catalog-quantity').value)||1));if(!product)return;items.push({type:'product',productId:product.id,metal:product.metal,quantity,product});renderItems();view.querySelector('#catalog-quantity').value='1'});
 };
 renderProductCalculator();
+
+const heroActions=document.querySelector('.hero .actions');
+if(heroActions&&!document.querySelector('.cash-now-note'))heroActions.insertAdjacentHTML('afterend','<p class="cash-now-note"><b>Gotówka od ręki</b> po akceptacji wyceny</p>');
+
+const jewelryCard=document.querySelector('.sell-grid a:first-child p');
+if(jewelryCard&&!document.querySelector('.jewelry-premium-inline'))jewelryCard.insertAdjacentHTML('afterend','<p class="jewelry-premium-inline"><b>Ważne:</b> za nieuszkodzoną biżuterię możesz otrzymać znacznie więcej niż wynosi cena samego złomu.</p>');
+const calcLive=document.querySelector('.calc-live');
+if(calcLive&&!document.querySelector('.jewelry-premium-note'))calcLive.insertAdjacentHTML('afterend','<div class="jewelry-premium-note"><b>Masz biżuterię w dobrym stanie?</b> Nie wyceniaj jej wyłącznie jak złomu — za nieuszkodzony wyrób możesz otrzymać znacznie więcej.</div>');
+const values=document.querySelector('.values');
+if(values&&!document.querySelector('.valuation-promises'))values.insertAdjacentHTML('afterend','<div class="valuation-promises"><span><b>Biżuteria w dobrym stanie</b> może być warta znacznie więcej niż złom</span><span><b>Gotówka od ręki</b> po zaakceptowaniu wyceny</span></div>');
+
+const footerTitle=document.querySelector('.footer-main h2');
+if(footerTitle)footerTitle.textContent='Uczciwa wycena.';
+
+const contactPhone=[...document.querySelectorAll('.contact-card div')].find(box=>box.querySelector('small')?.textContent.trim().toUpperCase()==='TELEFON');
+if(contactPhone&&!contactPhone.querySelector('.contact-whatsapp'))contactPhone.insertAdjacentHTML('beforeend','<a class="contact-whatsapp" href="https://wa.me/48601775146?text=Dzie%C5%84%20dobry%2C%20chc%C4%99%20zapyta%C4%87%20o%20wycen%C4%99." target="_blank" rel="noopener"><b>WA</b> Napisz na WhatsApp →</a>');
+
+const panelHead=document.querySelector('.panel-head');
+if(panelHead&&!panelHead.querySelector('.panel-reference-price')){
+  const reference=document.createElement('div');reference.className='panel-reference-price';
+  reference.innerHTML='<small>Cena czystego metalu</small><b>—</b><i>—</i>';
+  panelHead.insertBefore(reference,panelHead.querySelector('#updated-at'));
+  const updateReference=()=>{const metal=activeMetal||'gold',value=metalRates?.[metal],change=Number(changes?.[metal]||0),direction=change>0?'up':change<0?'down':'flat';reference.querySelector('b').textContent=Number.isFinite(value)?`${value.toFixed(2).replace('.',',')} zł/g`:'—';reference.querySelector('i').className=direction;reference.querySelector('i').textContent=`${change>0?'↑':change<0?'↓':'→'} ${Math.abs(change).toFixed(2).replace('.',',')}%`};
+  document.addEventListener('market-data-updated',updateReference);document.addEventListener('click',event=>{if(event.target.closest('[data-metal-tab]'))setTimeout(updateReference)});setTimeout(updateReference);
+}
