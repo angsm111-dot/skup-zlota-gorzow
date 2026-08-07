@@ -57,6 +57,7 @@ if(panelHead&&!panelHead.querySelector('.panel-reference-price')){
   const reference=document.createElement('div');reference.className='panel-reference-price';
   reference.innerHTML='<small>Fine Gold — Spot Price</small><b>—</b><i>—</i>';
   panelHead.insertBefore(reference,panelHead.querySelector('#updated-at'));
-  const updateReference=()=>{const metal=activeMetal||'gold',value=metalRates?.[metal],change=Number(changes?.[metal]||0),direction=change>0?'up':change<0?'down':'flat';reference.querySelector('b').textContent=Number.isFinite(value)?`${value.toFixed(2).replace('.',',')} zł/g`:'—';reference.querySelector('i').className=direction;reference.querySelector('i').textContent=`${change>0?'↑':change<0?'↓':'→'} ${Math.abs(change).toFixed(2).replace('.',',')}%`};
+  const spotLabels={gold:'Fine Gold — Spot Price',silver:'Fine Silver — Spot Price',platinum:'Fine Platinum — Spot Price',palladium:'Fine Palladium — Spot Price'};
+  const updateReference=()=>{const metal=activeMetal||'gold',value=metalRates?.[metal],change=Number(changes?.[metal]||0),direction=change>0?'up':change<0?'down':'flat';reference.querySelector('small').textContent=spotLabels[metal]||'Spot Price';reference.querySelector('b').textContent=Number.isFinite(value)?`${value.toFixed(2).replace('.',',')} zł/g`:'—';reference.querySelector('i').className=direction;reference.querySelector('i').textContent=`${change>0?'↑':change<0?'↓':'→'} ${Math.abs(change).toFixed(2).replace('.',',')}%`};
   document.addEventListener('market-data-updated',updateReference);document.addEventListener('click',event=>{if(event.target.closest('[data-metal-tab]'))setTimeout(updateReference)});setTimeout(updateReference);
 }
