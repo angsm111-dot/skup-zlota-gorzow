@@ -1,6 +1,6 @@
 const METALS={
   gold:{name:'Złoto',symbol:'Au',factor:.91,purities:[333,375,500,585,750,916,960,986,999],fallback:337.8},
-  silver:{name:'Srebro',symbol:'Ag',factor:.78,purities:[999,960,925,900,875,835,830,800],fallback:3.72},
+  silver:{name:'Srebro',symbol:'Ag',factor:.78,purities:[999,960,925,900,875,835,830,800,600],fallback:3.72},
   platinum:{name:'Platyna',symbol:'Pt',factor:.84,purities:[999,950,900,850],fallback:124.6},
   palladium:{name:'Pallad',symbol:'Pd',factor:.82,purities:[999,950,850,500],fallback:138.4}
 };
