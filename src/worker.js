@@ -1,6 +1,6 @@
 const METALS = {
   gold: { name: "Złoto", symbol: "Au", purities: [333,375,500,585,750,916,960,986,999], fallback: 337.8 },
-  silver: { name: "Srebro", symbol: "Ag", purities: [999,960,925,900,875,835,830,800], fallback: 3.72 },
+  silver: { name: "Srebro", symbol: "Ag", purities: [999,960,925,900,875,835,830,800,600], fallback: 3.72 },
   platinum: { name: "Platyna", symbol: "Pt", purities: [999,950,900,850], fallback: 124.6 },
   palladium: { name: "Pallad", symbol: "Pd", purities: [999,950,850,500], fallback: 138.4 }
 };
@@ -43,7 +43,7 @@ const PUBLIC_ROUTES = {
 };
 const DEFAULT_MARGINS = {
   gold:{333:22,375:20,500:16,585:14,750:11,916:9,960:8,986:7.5,999:7},
-  silver:{999:18,960:19,925:20,900:21,875:22,835:24,830:24,800:26},
+  silver:{999:18,960:19,925:20,900:21,875:22,835:24,830:24,800:26,600:30},
   platinum:{999:12,950:13,900:15,850:17},
   palladium:{999:15,950:16,850:19,500:28}
 };
