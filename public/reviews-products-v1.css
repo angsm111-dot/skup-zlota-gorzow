@@ -9,6 +9,8 @@
 .review-top{display:flex;align-items:center;gap:13px}.review-top>span{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:#181816;color:#d3a13a;font-weight:700}.review-top div{display:grid}.review-top small{color:#88837a;margin-top:2px}.review-grid p{font-size:17px;line-height:1.65;margin:28px 0 0;color:#34322e}
 .reviews-link{display:inline-flex;gap:12px;align-items:center;color:#181816;font-weight:700;margin-top:28px;padding-bottom:7px;border-bottom:1px solid #d3a13a}
 .product-photo[style*="gold-coin-families-v1"]{background-color:#f5f1e8}
+.product-photo{background-repeat:no-repeat!important;background-color:#f5f1e8;background-clip:padding-box;overflow:hidden}
+.product-calculator .product-photo{background-repeat:no-repeat!important;background-position:var(--product-position,center)!important;isolation:isolate}
 .product-grid.product-list{display:block!important;border-top:1px solid #ded9ce}
 .product-list .product-card{display:grid!important;grid-template-columns:108px minmax(0,1fr)!important;min-height:132px!important;border:0!important;border-bottom:1px solid #ded9ce!important;background:#fff!important;overflow:hidden!important}
 .product-list .product-photo{width:108px!important;height:108px!important;min-height:0!important;margin:12px!important;transform:none!important;transition:none!important;box-shadow:none!important;z-index:0!important;background-repeat:no-repeat!important;filter:none!important;cursor:default!important}

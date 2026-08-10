@@ -2,12 +2,13 @@ const PRODUCT_FALLBACK={
   goldCoins:[
     ...coinFallbackFamily('krugerrand','Krugerrand',916.7,33.9305,31.1035,0,4,[1,.5,.25,.1]),
     ...coinFallbackFamily('american-eagle','Amerykański Orzeł',916.7,33.931,31.1035,1,4,[1,.5,.25,.1]),
-    {id:'gold-american-buffalo-1oz',name:'Amerykański Bizon 1 oz',metal:'gold',kind:'coin',purity:999.9,grossWeight:31.1035,fineWeight:31.1004,familyIndex:2,margin:3.5,description:'Popularna moneta bulionowa z motywem bizona.'},
+    {id:'gold-american-buffalo-1oz',name:'Amerykański Bizon 1 oz',metal:'gold',kind:'coin',purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageKey:'american-buffalo',familyIndex:2,margin:3.5,description:'Popularna moneta bulionowa z motywem bizona.'},
     ...coinFallbackFamily('maple-leaf','Kanadyjski Liść Klonowy',999.9,31.1035,31.1004,3,3.5,[1,.5,.25,.1]),
     ...coinFallbackFamily('chinese-panda','Chińska Panda',999,31.1035,31.0724,4,4,[1,.5,.25,.1,.05,.04]),
     ...coinFallbackFamily('australian-kangaroo','Australijski Kangur',999.9,31.1035,31.1004,5,3.5,[1,.5,.25,.1]),
-    {id:'gold-philharmonic-1oz',name:'Filharmonik 1 oz',metal:'gold',kind:'coin',purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:2,margin:3.5},
-    {id:'gold-britannia-1oz',name:'Britannia 1 oz',metal:'gold',kind:'coin',purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:3,margin:3.5}
+    ...coinFallbackFamily('australian-kangaroo','Australijski Kangur',999.9,31.1035,31.1004,5,3.5,[.05,.04]),
+    ...coinFallbackFamily('philharmonic','Wiedeński Filharmonik',999.9,31.1035,31.1004,6,3.5,[1,.5,.25,.1,.05,.04]),
+    ...historicGoldCoinsFallback()
   ],
   silverCoins:[
     {id:'silver-maple-leaf-1oz',name:'Maple Leaf 1 oz',metal:'silver',kind:'coin',purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:0,margin:14},
@@ -21,13 +22,37 @@ const PRODUCT_FALLBACK={
 };
 function coinFallbackFamily(slug,label,purity,oneOzGross,oneOzFine,familyIndex,margin,fractions){
   const names={1:'1 oz',.5:'1/2 oz',.25:'1/4 oz',.1:'1/10 oz',.05:'1/20 oz',.04:'1/25 oz'};
-  return fractions.map(fraction=>({id:`gold-${slug}-${String(fraction).replace('.','-')}oz`,name:`${label} ${names[fraction]}`,metal:'gold',kind:'coin',purity,grossWeight:Math.round(oneOzGross*fraction*10000)/10000,fineWeight:Math.round(oneOzFine*fraction*10000)/10000,familyIndex,margin,description:`Złota moneta bulionowa ${label}, nominał ${names[fraction]}.`}));
+  return fractions.map(fraction=>({id:`gold-${slug}-${String(fraction).replace('.','-')}oz`,name:`${label} ${names[fraction]}`,metal:'gold',kind:'coin',purity,grossWeight:Math.round(oneOzGross*fraction*10000)/10000,fineWeight:Math.round(oneOzFine*fraction*10000)/10000,imageKey:slug,familyIndex,margin,description:`Złota moneta bulionowa ${label}, nominał ${names[fraction]}.`}));
 }
+function historicCoinFallback(id,name,purity,grossWeight,margin=6){return {id:`gold-${id}`,name,metal:'gold',kind:'coin',purity,grossWeight,fineWeight:Math.round(grossWeight*purity/1000*10000)/10000,imageKey:id,margin,description:'Złota moneta historyczna; cena zależy od zawartości czystego kruszcu i stanu zachowania.'}}
+function historicGoldCoinsFallback(){return [
+  historicCoinFallback('white-eagle-500-1oz','500 zł Orzeł Bielik (Polska) 1 oz',999.9,31.1035,4),historicCoinFallback('white-eagle-200-half','200 zł Orzeł Bielik (Polska) 1/2 oz',999.9,15.5518,4),historicCoinFallback('white-eagle-100-quarter','100 zł Orzeł Bielik (Polska) 1/4 oz',999.9,7.7759,4),historicCoinFallback('white-eagle-50-tenth','50 zł Orzeł Bielik (Polska) 1/10 oz',999.9,3.1104,4),
+  historicCoinFallback('usa-20-dollar','20 dolarów USA',900,33.436),historicCoinFallback('usa-10-dollar','10 dolarów USA',900,16.718),historicCoinFallback('usa-5-dollar','5 dolarów USA',900,8.359),historicCoinFallback('usa-2-5-dollar','2,5 dolara USA',900,4.18),
+  historicCoinFallback('russia-15-ruble','15 rubli (Rosja)',900,12.9039),historicCoinFallback('russia-10-ruble','10 rubli (Rosja)',900,8.6026),historicCoinFallback('russia-7-5-ruble','7,5 rubla (Rosja)',900,6.4516),historicCoinFallback('russia-5-ruble','5 rubli (Rosja)',900,4.3013),
+  historicCoinFallback('austria-4-ducat','4 dukaty austrowęgierskie',986,13.9636),historicCoinFallback('austria-1-ducat','1 dukat austrowęgierski',986,3.4909),historicCoinFallback('germany-20-mark','20 marek (Niemcy)',900,7.965),historicCoinFallback('germany-10-mark','10 marek (Niemcy)',900,3.982),historicCoinFallback('germany-5-mark','5 marek (Niemcy)',900,1.991),
+  historicCoinFallback('france-switzerland-20-franc','20 franków (Francja/Szwajcaria)',900,6.4516),historicCoinFallback('france-switzerland-10-franc','10 franków (Francja/Szwajcaria)',900,3.2258),historicCoinFallback('uk-sovereign','1 funt (Anglia)',916.7,7.9881),historicCoinFallback('austria-100-corona','100 koron (Austria)',900,33.8753),historicCoinFallback('austria-20-corona','20 koron (Austria)',900,6.7751),historicCoinFallback('austria-10-corona','10 koron (Austria)',900,3.3875),
+  historicCoinFallback('mexico-libertad-1oz','1 uncja (Meksyk)',999,31.1035,4),historicCoinFallback('mexico-libertad-half','1/2 uncji (Meksyk)',999,15.5518,4),historicCoinFallback('mexico-libertad-quarter','1/4 uncji (Meksyk)',999,7.7759,4),historicCoinFallback('mexico-50-pesos','50 pesos (Meksyk)',900,41.6667),historicCoinFallback('mexico-20-pesos','20 pesos (Meksyk)',900,16.6667),historicCoinFallback('mexico-10-pesos','10 pesos (Meksyk)',900,8.3333),historicCoinFallback('mexico-2-5-pesos','2,5 pesos (Meksyk)',900,2.0833),
+  historicCoinFallback('chile-100-pesos','100 pesos (Chile)',900,20.3397),historicCoinFallback('chile-50-pesos','50 pesos (Chile)',900,10.1699),historicCoinFallback('denmark-20-kroner','20 koron (Dania)',900,8.9606),historicCoinFallback('netherlands-10-guilder','10 guldenów (Holandia)',900,6.729),historicCoinFallback('austria-1000-schilling','1000 szylingów (Austria)',900,13.5),historicCoinFallback('britannia-100-pound','100 funtów Britannia',999.9,31.1035,4),historicCoinFallback('south-africa-2-rand','2 randy',916.7,7.9881)
+]}
 let productGroups=structuredClone(PRODUCT_FALLBACK),priceKind='purities',priceProductMetal='gold',calcKind='purities',calcProductMetal='gold',calcSelectedProduct='';
+const COMMONS_IMAGE_FILES={
+  'krugerrand':'1 oz Krugerrand 2017 Bildseite.png','american-eagle':'American-Gold-Eagle.jpg','american-buffalo':'American buffalo proof vertical edit.jpg','maple-leaf':'Canadian Maple Leaf.png','chinese-panda':'30g China Panda Goldmünze 2016.png','philharmonic':'1 oz Vienna Philharmonic 2017 averse.png',
+  'usa-20-dollar':'20 Dollars gold coin of the United States of America.jpg','usa-10-dollar':'United States Twenty-dollar Gold Piece MET DP170360.jpg','usa-5-dollar':'United States Twenty-dollar Gold Piece MET DP170360.jpg','usa-2-5-dollar':'United States Twenty-dollar Gold Piece MET DP170360.jpg',
+  'russia-15-ruble':'15-1897 реверс.jpg','russia-10-ruble':'10 рублей 1899.jpg','russia-5-ruble':'Russian Empire-1899-Coin-5-Obverse.jpg','austria-4-ducat':'Golddukaten.png','austria-1-ducat':'Golddukaten.png',
+  'germany-20-mark':'20 M Gold Kaiser Wilhelm I. von Preussen B 76.jpg','germany-10-mark':'20 M Gold Kaiser Wilhelm I. von Preussen B 76.jpg','germany-5-mark':'20 M Gold Kaiser Wilhelm I. von Preussen B 76.jpg',
+  'france-switzerland-20-franc':'20 Franc Helvetia coin front.png','france-switzerland-10-franc':'20 Franc Helvetia coin front.png','uk-sovereign':'Sovereign-victoria-avers.jpg',
+  'austria-100-corona':'Austria 1908 100 Kronen.jpg','austria-20-corona':'Austria 1908 100 Kronen.jpg','austria-10-corona':'Austria 1908 100 Kronen.jpg',
+  'mexico-libertad-1oz':'Libertad 1.20 oz Gold Vorderseite.jpg','mexico-libertad-half':'Libertad 1.20 oz Gold Vorderseite.jpg','mexico-libertad-quarter':'Libertad 1.20 oz Gold Vorderseite.jpg',
+  'mexico-50-pesos':'50 Pesos, Mexico, 1921 - National Museum of American History - DSC00266.jpg','mexico-20-pesos':'20 Peso Coin Given to Charles Lindbergh by Emilio Carranza - DPLA - 7e2ead179ec3948040a60a3e89fbd562 (page 1).jpg','mexico-10-pesos':'50 Pesos, Mexico, 1921 - National Museum of American History - DSC00266.jpg','mexico-2-5-pesos':'50 Pesos, Mexico, 1921 - National Museum of American History - DSC00266.jpg',
+  'chile-100-pesos':'100 Chilean Pesos (51636114).jpeg','chile-50-pesos':'100 Chilean Pesos (51636114).jpeg',
+  'denmark-20-kroner':'Two 20kr gold coins.jpg','netherlands-10-guilder':'Nederlandse 10 gulden, 1897 Nederland, 10 gulden, 1897, KOG-MP-1-5500.jpg','austria-1000-schilling':'1000 Schilling Babenberger Gold Bildseite.png',
+  'britannia-100-pound':'Liberty & Britannia Gold Coin.jpg','south-africa-2-rand':'Springbock-1-Doppelbild.jpg'
+};
+const commonsImageUrl=key=>COMMONS_IMAGE_FILES[key]?`https://commons.wikimedia.org/wiki/Special:Redirect/file/${encodeURIComponent(COMMONS_IMAGE_FILES[key])}?width=720`:'';
 const productMoney=value=>new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN'}).format(value);
 const productGroup=(metal,kind)=>(productGroups[`${metal}${kind==='coin'?'Coins':'Bars'}`]||[]).filter(product=>product.active!==false);
 const productPrice=product=>Number.isFinite(Number(product.price))?Number(product.price):metalRates[product.metal]*product.fineWeight*(1-Number(product.margin||0)/100);
-const productImageStyle=product=>product.imageData?`--product-image:url('${product.imageData}');--product-size:contain;--product-position:center`:(Number.isFinite(Number(product.familyIndex))?`--product-image:url('assets/gold-coin-families-v1.png');--product-size:600% auto;--product-position:${Number(product.familyIndex)/5*100}% center`:(product.kind==='coin'?`--product-image:url('assets/${product.metal}-coins-catalog.webp');--product-size:auto 200%;--product-position:${product.imageIndex/3*100}% center`:`--product-image:url('assets/bars-catalog.webp');--product-size:200% auto;--product-position:${product.metal==='gold'?0:100}% center`));
+const productImageStyle=product=>{const licensed=commonsImageUrl(product.imageKey);return product.imageData?`--product-image:url('${product.imageData}');--product-size:contain;--product-position:center`:(licensed?`--product-image:url('${licensed}');--product-size:contain;--product-position:center`:(Number.isFinite(Number(product.familyIndex))?`--product-image:url('assets/gold-coin-families-v1.png');--product-size:600% auto;--product-position:${Number(product.familyIndex)/5*100}% center`:(product.kind==='coin'?`--product-image:url('assets/${product.metal}-coins-catalog.webp');--product-size:auto 200%;--product-position:${product.imageIndex/3*100}% center`:`--product-image:url('assets/bars-catalog.webp');--product-size:200% auto;--product-position:${product.metal==='gold'?0:100}% center`)))};
 
 function productTabs(type){return `<div class="catalog-tabs" data-catalog-tabs="${type}"><button data-kind="purities" class="active">Rodzaj metalu</button><button data-kind="coin">Monety</button><button data-kind="bar">Sztabki</button></div>`}
 function productMetalButton(metal,symbol,label,active,kind){const empty=!productGroup(metal,kind).length;return `<button data-product-metal="${metal}" class="${active===metal?'active':''}" ${empty?'disabled title="Dodaj produkt w panelu administratora"':''}>${symbol} <span>${label}</span></button>`}
