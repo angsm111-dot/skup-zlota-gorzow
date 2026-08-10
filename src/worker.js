@@ -6,8 +6,12 @@ const METALS = {
 };
 const PRODUCTS = {
   goldCoins: [
-    {id:"gold-krugerrand-1oz",name:"Krugerrand 1 oz",metal:"gold",kind:"coin",purity:916.7,grossWeight:33.9305,fineWeight:31.1035,imageIndex:0,defaultMargin:4},
-    {id:"gold-maple-leaf-1oz",name:"Maple Leaf 1 oz",metal:"gold",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:1,defaultMargin:3.5},
+    ...coinFamily("krugerrand","Krugerrand",916.7,33.9305,31.1035,0,4,[1,.5,.25,.1]),
+    ...coinFamily("american-eagle","Amerykański Orzeł",916.7,33.931,31.1035,1,4,[1,.5,.25,.1]),
+    {id:"gold-american-buffalo-1oz",name:"Amerykański Bizon 1 oz",metal:"gold",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,familyIndex:2,defaultMargin:3.5,description:"Popularna moneta bulionowa z motywem bizona."},
+    ...coinFamily("maple-leaf","Kanadyjski Liść Klonowy",999.9,31.1035,31.1004,3,3.5,[1,.5,.25,.1]),
+    ...coinFamily("chinese-panda","Chińska Panda",999,31.1035,31.0724,4,4,[1,.5,.25,.1,.05,.04]),
+    ...coinFamily("australian-kangaroo","Australijski Kangur",999.9,31.1035,31.1004,5,3.5,[1,.5,.25,.1]),
     {id:"gold-philharmonic-1oz",name:"Filharmonik 1 oz",metal:"gold",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:2,defaultMargin:3.5},
     {id:"gold-britannia-1oz",name:"Britannia 1 oz",metal:"gold",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:3,defaultMargin:3.5}
   ],
@@ -24,6 +28,10 @@ const PRODUCTS = {
   palladiumCoins: [],
   palladiumBars: []
 };
+function coinFamily(slug,label,purity,oneOzGross,oneOzFine,familyIndex,defaultMargin,fractions){
+  const names={1:"1 oz",.5:"1/2 oz",.25:"1/4 oz",.1:"1/10 oz",.05:"1/20 oz",.04:"1/25 oz"};
+  return fractions.map(fraction=>({id:`gold-${slug}-${String(fraction).replace(".","-")}oz`,name:`${label} ${names[fraction]}`,metal:"gold",kind:"coin",purity,grossWeight:Math.round(oneOzGross*fraction*10000)/10000,fineWeight:Math.round(oneOzFine*fraction*10000)/10000,familyIndex,defaultMargin,description:`Złota moneta bulionowa ${label}, nominał ${names[fraction]}.`}));
+}
 const SYMBOLS = { silver: "XAG", platinum: "XPT", palladium: "XPD" };
 const DEFAULT_PROVIDER_URL = "https://investgold.pl/sezamcalc2.json";
 const PROVIDER_ALIASES = {
@@ -49,7 +57,7 @@ const DEFAULT_MARGINS = {
 };
 const json=(body,status=200,headers={})=>new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...headers}});
 const now=()=>new Date().toISOString();
-const SITE_VERSION="20260809-1";
+const SITE_VERSION="20260810-1";
 
 export default {
   async fetch(request,env,ctx){
