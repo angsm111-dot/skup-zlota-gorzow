@@ -53,6 +53,14 @@ renderItems=function(){const list=document.querySelector('#calc-items');list.inn
 function formatProductWeight(value){return value>=1000?`${(value/1000).toFixed(value%1000?2:0).replace('.',',')} kg`:`${Number(value).toFixed(value<10?2:1).replace('.',',').replace(/,0$/, '')} g`}
 async function loadProducts(){try{const response=await fetch(`/api/prices?products=${Date.now()}`,{cache:'no-store'});if(response.ok){const payload=await response.json();if(payload.products)productGroups=payload.products}}catch(error){console.warn('Cennik produktów chwilowo niedostępny.',error)}if(!productGroup(priceProductMetal,priceKind).length)priceProductMetal='gold';if(!productGroup(calcProductMetal,calcKind).length)calcProductMetal='gold';renderProductPrices();renderProductCalculator();renderItems()}
 
+renderProductPrices=function(){
+  const page=document.querySelector('[data-page="prices"]'),standardTabs=page.querySelector('.metal-tabs'),standardContent=page.querySelector('.content-grid'),view=page.querySelector('#product-price-view'),showProducts=priceKind!=='purities';
+  standardTabs.hidden=showProducts;standardContent.hidden=showProducts;view.hidden=!showProducts;if(!showProducts)return;
+  const list=productGroup(priceProductMetal,priceKind),metalLabel={gold:'złoto',silver:'srebro',platinum:'platyna',palladium:'pallad'}[priceProductMetal];
+  view.innerHTML=`${metalSwitch('prices',priceProductMetal)}<div class="product-price-head"><div><p class="eyebrow dark">Cennik produktów inwestycyjnych</p><h2>${priceKind==='coin'?'Monety':'Sztabki'} — ${metalLabel}</h2></div><p>Cena uwzględnia próbę, rzeczywistą zawartość czystego metalu oraz ustawienia skupu. Zdjęcia produktów mają charakter identyfikacyjny.</p></div><div class="product-grid product-list">${list.map(product=>`<article class="product-card"><div class="product-photo" style="${productImageStyle(product)}" role="img" aria-label="${product.name}"></div><div class="product-card-body"><small>${product.kind==='coin'?'MONETA':'SZTABKA'} • PRÓBA ${String(product.purity).replace('.',',')}</small><h3>${product.name}</h3>${product.description?`<p class="product-description">${product.description}</p>`:''}<dl><div><dt>Masa całkowita</dt><dd>${formatProductWeight(product.grossWeight)}</dd></div><div><dt>Czysty metal</dt><dd>${formatProductWeight(product.fineWeight)}</dd></div></dl><strong>${productMoney(productPrice(product))}</strong><span>${product.kind==='coin'?'cena za monetę w stanie menniczym':'cena skupu za sztukę'}</span></div></article>`).join('')}</div>`;
+  view.querySelector('[data-catalog-metal="prices"]').addEventListener('click',event=>{const button=event.target.closest('button');if(!button||button.disabled)return;priceProductMetal=button.dataset.productMetal;renderProductPrices()});
+};
+
 setupProductPrices();setupProductCalculator();renderProductPrices();renderProductCalculator();loadProducts();setInterval(loadProducts,60000);
 
 function updateProductConditionNotes(){
@@ -73,6 +81,4 @@ function updateProductConditionNotes(){
     if(calcKind!=='coin'&&note)note.remove();
   }
 }
-const productConditionObserver=new MutationObserver(updateProductConditionNotes);
-document.querySelectorAll('#product-price-view,#product-calculator').forEach(element=>productConditionObserver.observe(element,{childList:true,subtree:true}));
 updateProductConditionNotes();
