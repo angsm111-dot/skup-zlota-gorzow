@@ -8,12 +8,13 @@ const PRODUCTS = {
   goldCoins: [
     ...coinFamily("krugerrand","Krugerrand",916.7,33.9305,31.1035,0,4,[1,.5,.25,.1]),
     ...coinFamily("american-eagle","Amerykański Orzeł",916.7,33.931,31.1035,1,4,[1,.5,.25,.1]),
-    {id:"gold-american-buffalo-1oz",name:"Amerykański Bizon 1 oz",metal:"gold",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,familyIndex:2,defaultMargin:3.5,description:"Popularna moneta bulionowa z motywem bizona."},
+    {id:"gold-american-buffalo-1oz",name:"Amerykański Bizon 1 oz",metal:"gold",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageKey:"american-buffalo",familyIndex:2,defaultMargin:3.5,description:"Popularna moneta bulionowa z motywem bizona."},
     ...coinFamily("maple-leaf","Kanadyjski Liść Klonowy",999.9,31.1035,31.1004,3,3.5,[1,.5,.25,.1]),
     ...coinFamily("chinese-panda","Chińska Panda",999,31.1035,31.0724,4,4,[1,.5,.25,.1,.05,.04]),
     ...coinFamily("australian-kangaroo","Australijski Kangur",999.9,31.1035,31.1004,5,3.5,[1,.5,.25,.1]),
-    {id:"gold-philharmonic-1oz",name:"Filharmonik 1 oz",metal:"gold",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:2,defaultMargin:3.5},
-    {id:"gold-britannia-1oz",name:"Britannia 1 oz",metal:"gold",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:3,defaultMargin:3.5}
+    ...coinFamily("australian-kangaroo","Australijski Kangur",999.9,31.1035,31.1004,5,3.5,[.05,.04]),
+    ...coinFamily("philharmonic","Wiedeński Filharmonik",999.9,31.1035,31.1004,6,3.5,[1,.5,.25,.1,.05,.04]),
+    ...historicGoldCoins()
   ],
   silverCoins: [
     {id:"silver-maple-leaf-1oz",name:"Maple Leaf 1 oz",metal:"silver",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:0,defaultMargin:14},
@@ -30,8 +31,21 @@ const PRODUCTS = {
 };
 function coinFamily(slug,label,purity,oneOzGross,oneOzFine,familyIndex,defaultMargin,fractions){
   const names={1:"1 oz",.5:"1/2 oz",.25:"1/4 oz",.1:"1/10 oz",.05:"1/20 oz",.04:"1/25 oz"};
-  return fractions.map(fraction=>({id:`gold-${slug}-${String(fraction).replace(".","-")}oz`,name:`${label} ${names[fraction]}`,metal:"gold",kind:"coin",purity,grossWeight:Math.round(oneOzGross*fraction*10000)/10000,fineWeight:Math.round(oneOzFine*fraction*10000)/10000,familyIndex,defaultMargin,description:`Złota moneta bulionowa ${label}, nominał ${names[fraction]}.`}));
+  return fractions.map(fraction=>({id:`gold-${slug}-${String(fraction).replace(".","-")}oz`,name:`${label} ${names[fraction]}`,metal:"gold",kind:"coin",purity,grossWeight:Math.round(oneOzGross*fraction*10000)/10000,fineWeight:Math.round(oneOzFine*fraction*10000)/10000,imageKey:slug,familyIndex,defaultMargin,description:`Złota moneta bulionowa ${label}, nominał ${names[fraction]}.`}));
 }
+function historicCoin(id,name,purity,grossWeight,defaultMargin=6){return {id:`gold-${id}`,name,metal:"gold",kind:"coin",purity,grossWeight,fineWeight:Math.round(grossWeight*purity/1000*10000)/10000,imageKey:id,defaultMargin,description:"Złota moneta historyczna; cena zależy od zawartości czystego kruszcu i stanu zachowania."}}
+function historicGoldCoins(){return [
+  historicCoin("white-eagle-500-1oz","500 zł Orzeł Bielik (Polska) 1 oz",999.9,31.1035,4),historicCoin("white-eagle-200-half","200 zł Orzeł Bielik (Polska) 1/2 oz",999.9,15.5518,4),historicCoin("white-eagle-100-quarter","100 zł Orzeł Bielik (Polska) 1/4 oz",999.9,7.7759,4),historicCoin("white-eagle-50-tenth","50 zł Orzeł Bielik (Polska) 1/10 oz",999.9,3.1104,4),
+  historicCoin("usa-20-dollar","20 dolarów USA",900,33.436),historicCoin("usa-10-dollar","10 dolarów USA",900,16.718),historicCoin("usa-5-dollar","5 dolarów USA",900,8.359),historicCoin("usa-2-5-dollar","2,5 dolara USA",900,4.18),
+  historicCoin("russia-15-ruble","15 rubli (Rosja)",900,12.9039),historicCoin("russia-10-ruble","10 rubli (Rosja)",900,8.6026),historicCoin("russia-7-5-ruble","7,5 rubla (Rosja)",900,6.4516),historicCoin("russia-5-ruble","5 rubli (Rosja)",900,4.3013),
+  historicCoin("austria-4-ducat","4 dukaty austrowęgierskie",986,13.9636),historicCoin("austria-1-ducat","1 dukat austrowęgierski",986,3.4909),
+  historicCoin("germany-20-mark","20 marek (Niemcy)",900,7.965),historicCoin("germany-10-mark","10 marek (Niemcy)",900,3.982),historicCoin("germany-5-mark","5 marek (Niemcy)",900,1.991),
+  historicCoin("france-switzerland-20-franc","20 franków (Francja/Szwajcaria)",900,6.4516),historicCoin("france-switzerland-10-franc","10 franków (Francja/Szwajcaria)",900,3.2258),historicCoin("uk-sovereign","1 funt (Anglia)",916.7,7.9881),
+  historicCoin("austria-100-corona","100 koron (Austria)",900,33.8753),historicCoin("austria-20-corona","20 koron (Austria)",900,6.7751),historicCoin("austria-10-corona","10 koron (Austria)",900,3.3875),
+  historicCoin("mexico-libertad-1oz","1 uncja (Meksyk)",999,31.1035,4),historicCoin("mexico-libertad-half","1/2 uncji (Meksyk)",999,15.5518,4),historicCoin("mexico-libertad-quarter","1/4 uncji (Meksyk)",999,7.7759,4),
+  historicCoin("mexico-50-pesos","50 pesos (Meksyk)",900,41.6667),historicCoin("mexico-20-pesos","20 pesos (Meksyk)",900,16.6667),historicCoin("mexico-10-pesos","10 pesos (Meksyk)",900,8.3333),historicCoin("mexico-2-5-pesos","2,5 pesos (Meksyk)",900,2.0833),
+  historicCoin("chile-100-pesos","100 pesos (Chile)",900,20.3397),historicCoin("chile-50-pesos","50 pesos (Chile)",900,10.1699),historicCoin("denmark-20-kroner","20 koron (Dania)",900,8.9606),historicCoin("netherlands-10-guilder","10 guldenów (Holandia)",900,6.729),historicCoin("austria-1000-schilling","1000 szylingów (Austria)",900,13.5),historicCoin("britannia-100-pound","100 funtów Britannia",999.9,31.1035,4),historicCoin("south-africa-2-rand","2 randy",916.7,7.9881)
+]}
 const SYMBOLS = { silver: "XAG", platinum: "XPT", palladium: "XPD" };
 const DEFAULT_PROVIDER_URL = "https://investgold.pl/sezamcalc2.json";
 const PROVIDER_ALIASES = {
@@ -216,7 +230,7 @@ function sanitizeCustomProducts(input){
   return (Array.isArray(input)?input:[]).slice(0,40).map((item,index)=>{
     const allowedMetals=["gold","silver","platinum","palladium"],metal=allowedMetals.includes(item?.metal)?item.metal:"gold",kind=item?.kind==="bar"?"bar":"coin",purity=clamp(Number(item?.purity),1,999.9),grossWeight=clamp(Number(item?.grossWeight),.01,100000),calculatedFine=grossWeight*(purity/1000),fineWeight=clamp(Number(item?.fineWeight)||calculatedFine,.001,grossWeight),rawImage=String(item?.imageData||""),id=String(item?.id||`custom-${Date.now()}-${index}`).replace(/[^a-z0-9_-]/gi,"-").slice(0,80),builtIn=baseIds.has(id);
     const imageData=/^data:image\/(?:webp|jpeg|png);base64,/i.test(rawImage)&&rawImage.length<=500000?rawImage:"";
-    return {id,name:String(item?.name||"Produkt bez nazwy").replace(/[<>&\"]/g,"").trim().slice(0,100),description:String(item?.description||"").replace(/[<>&]/g,"").trim().slice(0,300),metal,kind,purity:round(purity),grossWeight:round(grossWeight),fineWeight:round(fineWeight),imageData,imageIndex:clamp(Number(item?.imageIndex)||0,0,20),active:item?.active!==false,custom:!builtIn,overridden:builtIn,defaultMargin:clamp(Number(item?.defaultMargin??10),0,100)};
+    return {id,name:String(item?.name||"Produkt bez nazwy").replace(/[<>&\"]/g,"").trim().slice(0,100),description:String(item?.description||"").replace(/[<>&]/g,"").trim().slice(0,300),metal,kind,purity:round(purity),grossWeight:round(grossWeight),fineWeight:round(fineWeight),imageData,imageKey:String(item?.imageKey||"").replace(/[^a-z0-9-]/gi,"").slice(0,80),imageIndex:clamp(Number(item?.imageIndex)||0,0,20),active:item?.active!==false,custom:!builtIn,overridden:builtIn,defaultMargin:clamp(Number(item?.defaultMargin??10),0,100)};
   }).filter(item=>item.name&&(item.imageData||item.overridden));
 }
 function allProductGroups(config){
