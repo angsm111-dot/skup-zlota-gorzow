@@ -1,7 +1,11 @@
 const PRODUCT_FALLBACK={
   goldCoins:[
-    {id:'gold-krugerrand-1oz',name:'Krugerrand 1 oz',metal:'gold',kind:'coin',purity:916.7,grossWeight:33.9305,fineWeight:31.1035,imageIndex:0,margin:4},
-    {id:'gold-maple-leaf-1oz',name:'Maple Leaf 1 oz',metal:'gold',kind:'coin',purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:1,margin:3.5},
+    ...coinFallbackFamily('krugerrand','Krugerrand',916.7,33.9305,31.1035,0,4,[1,.5,.25,.1]),
+    ...coinFallbackFamily('american-eagle','Amerykański Orzeł',916.7,33.931,31.1035,1,4,[1,.5,.25,.1]),
+    {id:'gold-american-buffalo-1oz',name:'Amerykański Bizon 1 oz',metal:'gold',kind:'coin',purity:999.9,grossWeight:31.1035,fineWeight:31.1004,familyIndex:2,margin:3.5,description:'Popularna moneta bulionowa z motywem bizona.'},
+    ...coinFallbackFamily('maple-leaf','Kanadyjski Liść Klonowy',999.9,31.1035,31.1004,3,3.5,[1,.5,.25,.1]),
+    ...coinFallbackFamily('chinese-panda','Chińska Panda',999,31.1035,31.0724,4,4,[1,.5,.25,.1,.05,.04]),
+    ...coinFallbackFamily('australian-kangaroo','Australijski Kangur',999.9,31.1035,31.1004,5,3.5,[1,.5,.25,.1]),
     {id:'gold-philharmonic-1oz',name:'Filharmonik 1 oz',metal:'gold',kind:'coin',purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:2,margin:3.5},
     {id:'gold-britannia-1oz',name:'Britannia 1 oz',metal:'gold',kind:'coin',purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:3,margin:3.5}
   ],
@@ -15,11 +19,15 @@ const PRODUCT_FALLBACK={
   silverBars:[50,100,250,500,1000].map((weight,index)=>({id:`silver-bar-${weight}g`,name:weight===1000?'Sztabka 1 kg':`Sztabka ${weight} g`,metal:'silver',kind:'bar',purity:999,grossWeight:weight,fineWeight:weight*.999,imageIndex:1,margin:12})),
   platinumCoins:[],platinumBars:[],palladiumCoins:[],palladiumBars:[]
 };
+function coinFallbackFamily(slug,label,purity,oneOzGross,oneOzFine,familyIndex,margin,fractions){
+  const names={1:'1 oz',.5:'1/2 oz',.25:'1/4 oz',.1:'1/10 oz',.05:'1/20 oz',.04:'1/25 oz'};
+  return fractions.map(fraction=>({id:`gold-${slug}-${String(fraction).replace('.','-')}oz`,name:`${label} ${names[fraction]}`,metal:'gold',kind:'coin',purity,grossWeight:Math.round(oneOzGross*fraction*10000)/10000,fineWeight:Math.round(oneOzFine*fraction*10000)/10000,familyIndex,margin,description:`Złota moneta bulionowa ${label}, nominał ${names[fraction]}.`}));
+}
 let productGroups=structuredClone(PRODUCT_FALLBACK),priceKind='purities',priceProductMetal='gold',calcKind='purities',calcProductMetal='gold',calcSelectedProduct='';
 const productMoney=value=>new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN'}).format(value);
 const productGroup=(metal,kind)=>(productGroups[`${metal}${kind==='coin'?'Coins':'Bars'}`]||[]).filter(product=>product.active!==false);
 const productPrice=product=>Number.isFinite(Number(product.price))?Number(product.price):metalRates[product.metal]*product.fineWeight*(1-Number(product.margin||0)/100);
-const productImageStyle=product=>product.imageData?`--product-image:url('${product.imageData}');--product-size:contain;--product-position:center`:(product.kind==='coin'?`--product-image:url('assets/${product.metal}-coins-catalog.webp');--product-size:auto 200%;--product-position:${product.imageIndex/3*100}% center`:`--product-image:url('assets/bars-catalog.webp');--product-size:200% auto;--product-position:${product.metal==='gold'?0:100}% center`);
+const productImageStyle=product=>product.imageData?`--product-image:url('${product.imageData}');--product-size:contain;--product-position:center`:(Number.isFinite(Number(product.familyIndex))?`--product-image:url('assets/gold-coin-families-v1.png');--product-size:600% auto;--product-position:${Number(product.familyIndex)/5*100}% center`:(product.kind==='coin'?`--product-image:url('assets/${product.metal}-coins-catalog.webp');--product-size:auto 200%;--product-position:${product.imageIndex/3*100}% center`:`--product-image:url('assets/bars-catalog.webp');--product-size:200% auto;--product-position:${product.metal==='gold'?0:100}% center`));
 
 function productTabs(type){return `<div class="catalog-tabs" data-catalog-tabs="${type}"><button data-kind="purities" class="active">Rodzaj metalu</button><button data-kind="coin">Monety</button><button data-kind="bar">Sztabki</button></div>`}
 function productMetalButton(metal,symbol,label,active,kind){const empty=!productGroup(metal,kind).length;return `<button data-product-metal="${metal}" class="${active===metal?'active':''}" ${empty?'disabled title="Dodaj produkt w panelu administratora"':''}>${symbol} <span>${label}</span></button>`}

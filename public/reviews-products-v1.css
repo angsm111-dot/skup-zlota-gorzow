@@ -1,0 +1,12 @@
+.google-reviews{padding:clamp(64px,7vw,112px) max(5vw,28px);background:#fff;border-top:1px solid #ded9ce}
+.reviews-heading{display:flex;justify-content:space-between;gap:40px;align-items:flex-end;margin-bottom:36px}
+.reviews-heading h2{font:600 clamp(36px,4vw,68px)/.98 Manrope,sans-serif;letter-spacing:-.055em;margin:14px 0 0}
+.google-score{display:grid;grid-template-columns:auto auto;align-items:center;gap:3px 12px;min-width:230px}
+.google-mark{grid-row:1/3;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#f6f2e9;color:#4285f4;font:700 25px Manrope,sans-serif}
+.google-score strong{font:700 31px/1 Manrope,sans-serif}.review-stars{color:#d3a13a;letter-spacing:2px}.google-score small{grid-column:1/-1;color:#77736b;margin-top:7px}
+.review-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #ded9ce}
+.review-grid article{padding:30px;min-height:220px}.review-grid article+article{border-left:1px solid #ded9ce}
+.review-top{display:flex;align-items:center;gap:13px}.review-top>span{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:#181816;color:#d3a13a;font-weight:700}.review-top div{display:grid}.review-top small{color:#88837a;margin-top:2px}.review-grid p{font-size:17px;line-height:1.65;margin:28px 0 0;color:#34322e}
+.reviews-link{display:inline-flex;gap:12px;align-items:center;color:#181816;font-weight:700;margin-top:28px;padding-bottom:7px;border-bottom:1px solid #d3a13a}
+.product-photo[style*="gold-coin-families-v1"]{background-color:#f5f1e8}
+@media(max-width:760px){.reviews-heading{align-items:flex-start;flex-direction:column}.review-grid{grid-template-columns:1fr}.review-grid article{min-height:0}.review-grid article+article{border-left:0;border-top:1px solid #ded9ce}.google-score{min-width:0}}
