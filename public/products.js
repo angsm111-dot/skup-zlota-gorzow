@@ -60,7 +60,7 @@ function updateProductConditionNotes(){
   document.querySelectorAll('.product-card').forEach((card,index)=>{
     const product=visibleProducts[index],heading=card.querySelector('h3');let description=card.querySelector('.product-description');
     if(product?.description&&!description){description=document.createElement('p');description.className='product-description';heading?.after(description)}
-    if(description){description.textContent=product?.description||'';description.hidden=!product?.description}
+    if(description){const text=product?.description||'';if(description.textContent!==text)description.textContent=text;description.hidden=!text}
     const coin=card.querySelector('.product-card-body > small')?.textContent.includes('MONETA');
     const caption=card.querySelector('.product-card-body > span');
     const label=coin?'cena za monetę w stanie menniczym':'cena skupu za sztukę';
