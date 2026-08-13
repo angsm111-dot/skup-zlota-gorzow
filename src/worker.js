@@ -236,7 +236,7 @@ function sanitizeCustomProducts(input){
     const allowedMetals=["gold","silver","platinum","palladium"],metal=allowedMetals.includes(item?.metal)?item.metal:"gold",kind=item?.kind==="bar"?"bar":"coin",purity=clamp(Number(item?.purity),1,999.9),grossWeight=clamp(Number(item?.grossWeight),.01,100000),calculatedFine=grossWeight*(purity/1000),fineWeight=clamp(Number(item?.fineWeight)||calculatedFine,.001,grossWeight),rawImage=String(item?.imageData||""),id=String(item?.id||`custom-${Date.now()}-${index}`).replace(/[^a-z0-9_-]/gi,"-").slice(0,80),builtIn=baseIds.has(id);
     const imageData=/^data:image\/(?:webp|jpeg|png);base64,/i.test(rawImage)&&rawImage.length<=500000?rawImage:"";
     return {id,name:String(item?.name||"Produkt bez nazwy").replace(/[<>&\"]/g,"").trim().slice(0,100),description:String(item?.description||"").replace(/[<>&]/g,"").trim().slice(0,300),metal,kind,purity:round(purity),grossWeight:round(grossWeight),fineWeight:round(fineWeight),imageData,imageKey:String(item?.imageKey||"").replace(/[^a-z0-9-]/gi,"").slice(0,80),imageIndex:clamp(Number(item?.imageIndex)||0,0,20),order:clamp(Number(item?.order??index),0,10000),active:item?.active!==false,custom:!builtIn,overridden:builtIn,defaultMargin:clamp(Number(item?.defaultMargin??10),0,100)};
-  }).filter(item=>item.name&&(item.imageData||item.overridden));
+  }).filter(item=>item.name);
 }
 function allProductGroups(config){
   const groups=Object.fromEntries(Object.entries(PRODUCTS).map(([key,list])=>[key,list.map(product=>({...product,description:product.description||"",custom:false,overridden:false,active:true}))]));
