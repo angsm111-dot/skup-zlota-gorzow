@@ -17,18 +17,23 @@ const PRODUCTS = {
     ...historicGoldCoins()
   ],
   silverCoins: [
-    {id:"silver-maple-leaf-1oz",name:"Maple Leaf 1 oz",metal:"silver",kind:"coin",purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:0,defaultMargin:14},
-    {id:"silver-philharmonic-1oz",name:"Filharmonik 1 oz",metal:"silver",kind:"coin",purity:999,grossWeight:31.1035,fineWeight:31.0724,imageIndex:1,defaultMargin:15},
-    {id:"silver-britannia-1oz",name:"Britannia 1 oz",metal:"silver",kind:"coin",purity:999,grossWeight:31.1035,fineWeight:31.0724,imageIndex:2,defaultMargin:15},
-    {id:"silver-krugerrand-1oz",name:"Krugerrand 1 oz",metal:"silver",kind:"coin",purity:999,grossWeight:31.1035,fineWeight:31.0724,imageIndex:3,defaultMargin:15}
+    silverCoin("maple-leaf-1oz","Kanadyjski Liść Klonowy 1 oz",31.1035,0,14),
+    silverCoin("krugerrand-1oz","Krugerrand 1 oz",31.1035,3,15),
+    silverCoin("britannia-1oz","Brytyjska Britannia 1 oz",31.1035,2,15),
+    silverCoin("american-eagle-1oz","Amerykański Orzeł 1 oz",31.1035,0,15),
+    silverCoin("kangaroo-1oz","Australijski Kangur 1 oz",31.1035,0,15),
+    silverCoin("philharmonic-1oz","Wiedeński Filharmonik 1 oz",31.1035,1,15),
+    silverCoin("lunar-2oz","Australijski Lunar 2 oz",62.207,0,15),
+    silverCoin("kookaburra-1kg","Australijska Kookaburra 1 kg",1000,0,13)
   ],
-  goldBars: [1,2.5,5,10,20,31.1035,50,100].map(weight=>({id:`gold-bar-${String(weight).replace(".","-")}g`,name:weight===31.1035?"Sztabka 1 oz":"Sztabka "+String(weight).replace(".",",")+" g",metal:"gold",kind:"bar",purity:999.9,grossWeight:weight,fineWeight:weight*.9999,imageIndex:0,defaultMargin:3})),
-  silverBars: [50,100,250,500,1000].map(weight=>({id:`silver-bar-${weight}g`,name:weight===1000?"Sztabka 1 kg":"Sztabka "+weight+" g",metal:"silver",kind:"bar",purity:999,grossWeight:weight,fineWeight:weight*.999,imageIndex:1,defaultMargin:12}))
+  goldBars: [31.1035,1,2.5,5,10,20,50,100].map(weight=>({id:`gold-bar-${String(weight).replace(".","-")}g`,name:weight===31.1035?"Sztabka 1 oz":"Sztabka "+String(weight).replace(".",",")+" g",metal:"gold",kind:"bar",purity:999.9,grossWeight:weight,fineWeight:weight*.9999,imageIndex:0,defaultMargin:3})),
+  silverBars: [31.1035,50,100,250,500,1000].map(weight=>({id:`silver-bar-${String(weight).replace(".","-")}g`,name:weight===31.1035?"Sztabka 1 oz":weight===1000?"Sztabka 1 kg":"Sztabka "+weight+" g",metal:"silver",kind:"bar",purity:999.9,grossWeight:weight,fineWeight:weight*.9999,imageIndex:1,defaultMargin:12}))
   ,platinumCoins: [],
   platinumBars: [],
   palladiumCoins: [],
   palladiumBars: []
 };
+function silverCoin(id,name,grossWeight,imageIndex,defaultMargin){return {id:`silver-${id}`,name,metal:"silver",kind:"coin",purity:999.9,grossWeight,fineWeight:Math.round(grossWeight*.9999*10000)/10000,imageIndex,defaultMargin,description:"Popularna srebrna moneta bulionowa próby Ag 999,9."}}
 function coinFamily(slug,label,purity,oneOzGross,oneOzFine,familyIndex,defaultMargin,fractions){
   const names={1:"1 oz",.5:"1/2 oz",.25:"1/4 oz",.1:"1/10 oz",.05:"1/20 oz",.04:"1/25 oz"};
   return fractions.map(fraction=>({id:`gold-${slug}-${String(fraction).replace(".","-")}oz`,name:`${label} ${names[fraction]}`,metal:"gold",kind:"coin",purity,grossWeight:Math.round(oneOzGross*fraction*10000)/10000,fineWeight:Math.round(oneOzFine*fraction*10000)/10000,imageKey:slug,familyIndex,defaultMargin,description:`Złota moneta bulionowa ${label}, nominał ${names[fraction]}.`}));
@@ -227,10 +232,10 @@ async function getConfig(env){const stored=await readJson(env,"config:pricing"),
 
 function sanitizeCustomProducts(input){
   const baseIds=new Set(Object.values(PRODUCTS).flat().map(product=>product.id));
-  return (Array.isArray(input)?input:[]).slice(0,40).map((item,index)=>{
+  return (Array.isArray(input)?input:[]).slice(0,250).map((item,index)=>{
     const allowedMetals=["gold","silver","platinum","palladium"],metal=allowedMetals.includes(item?.metal)?item.metal:"gold",kind=item?.kind==="bar"?"bar":"coin",purity=clamp(Number(item?.purity),1,999.9),grossWeight=clamp(Number(item?.grossWeight),.01,100000),calculatedFine=grossWeight*(purity/1000),fineWeight=clamp(Number(item?.fineWeight)||calculatedFine,.001,grossWeight),rawImage=String(item?.imageData||""),id=String(item?.id||`custom-${Date.now()}-${index}`).replace(/[^a-z0-9_-]/gi,"-").slice(0,80),builtIn=baseIds.has(id);
     const imageData=/^data:image\/(?:webp|jpeg|png);base64,/i.test(rawImage)&&rawImage.length<=500000?rawImage:"";
-    return {id,name:String(item?.name||"Produkt bez nazwy").replace(/[<>&\"]/g,"").trim().slice(0,100),description:String(item?.description||"").replace(/[<>&]/g,"").trim().slice(0,300),metal,kind,purity:round(purity),grossWeight:round(grossWeight),fineWeight:round(fineWeight),imageData,imageKey:String(item?.imageKey||"").replace(/[^a-z0-9-]/gi,"").slice(0,80),imageIndex:clamp(Number(item?.imageIndex)||0,0,20),active:item?.active!==false,custom:!builtIn,overridden:builtIn,defaultMargin:clamp(Number(item?.defaultMargin??10),0,100)};
+    return {id,name:String(item?.name||"Produkt bez nazwy").replace(/[<>&\"]/g,"").trim().slice(0,100),description:String(item?.description||"").replace(/[<>&]/g,"").trim().slice(0,300),metal,kind,purity:round(purity),grossWeight:round(grossWeight),fineWeight:round(fineWeight),imageData,imageKey:String(item?.imageKey||"").replace(/[^a-z0-9-]/gi,"").slice(0,80),imageIndex:clamp(Number(item?.imageIndex)||0,0,20),order:clamp(Number(item?.order??index),0,10000),active:item?.active!==false,custom:!builtIn,overridden:builtIn,defaultMargin:clamp(Number(item?.defaultMargin??10),0,100)};
   }).filter(item=>item.name&&(item.imageData||item.overridden));
 }
 function allProductGroups(config){
@@ -240,6 +245,7 @@ function allProductGroups(config){
     const existing=groups[group].findIndex(item=>item.id===product.id);
     if(existing>=0)groups[group][existing]={...groups[group][existing],...product,custom:false,overridden:true};else groups[group].push(product);
   }
+  for(const list of Object.values(groups))list.sort((a,b)=>(Number(a.order??10000)-Number(b.order??10000))||(PRODUCTS[`${a.metal}${a.kind==="coin"?"Coins":"Bars"}`]?.findIndex(item=>item.id===a.id)??0)-(PRODUCTS[`${b.metal}${b.kind==="coin"?"Coins":"Bars"}`]?.findIndex(item=>item.id===b.id)??0));
   return groups;
 }
 async function readJson(env,key){if(!env.PRICE_STORE)return null;const v=await env.PRICE_STORE.get(key);return v?JSON.parse(v):null}
