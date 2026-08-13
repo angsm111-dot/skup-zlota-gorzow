@@ -11,15 +11,20 @@ const PRODUCT_FALLBACK={
     ...historicGoldCoinsFallback()
   ],
   silverCoins:[
-    {id:'silver-maple-leaf-1oz',name:'Maple Leaf 1 oz',metal:'silver',kind:'coin',purity:999.9,grossWeight:31.1035,fineWeight:31.1004,imageIndex:0,margin:14},
-    {id:'silver-philharmonic-1oz',name:'Filharmonik 1 oz',metal:'silver',kind:'coin',purity:999,grossWeight:31.1035,fineWeight:31.0724,imageIndex:1,margin:15},
-    {id:'silver-britannia-1oz',name:'Britannia 1 oz',metal:'silver',kind:'coin',purity:999,grossWeight:31.1035,fineWeight:31.0724,imageIndex:2,margin:15},
-    {id:'silver-krugerrand-1oz',name:'Krugerrand 1 oz',metal:'silver',kind:'coin',purity:999,grossWeight:31.1035,fineWeight:31.0724,imageIndex:3,margin:15}
+    silverCoinFallback('maple-leaf-1oz','Kanadyjski Liść Klonowy 1 oz',31.1035,0,14),
+    silverCoinFallback('krugerrand-1oz','Krugerrand 1 oz',31.1035,3,15),
+    silverCoinFallback('britannia-1oz','Brytyjska Britannia 1 oz',31.1035,2,15),
+    silverCoinFallback('american-eagle-1oz','Amerykański Orzeł 1 oz',31.1035,0,15),
+    silverCoinFallback('kangaroo-1oz','Australijski Kangur 1 oz',31.1035,0,15),
+    silverCoinFallback('philharmonic-1oz','Wiedeński Filharmonik 1 oz',31.1035,1,15),
+    silverCoinFallback('lunar-2oz','Australijski Lunar 2 oz',62.207,0,15),
+    silverCoinFallback('kookaburra-1kg','Australijska Kookaburra 1 kg',1000,0,13)
   ],
-  goldBars:[1,2.5,5,10,20,31.1035,50,100].map((weight,index)=>({id:`gold-bar-${String(weight).replace('.','-')}g`,name:weight===31.1035?'Sztabka 1 oz':`Sztabka ${String(weight).replace('.',',')} g`,metal:'gold',kind:'bar',purity:999.9,grossWeight:weight,fineWeight:weight*.9999,imageIndex:0,margin:3})),
-  silverBars:[50,100,250,500,1000].map((weight,index)=>({id:`silver-bar-${weight}g`,name:weight===1000?'Sztabka 1 kg':`Sztabka ${weight} g`,metal:'silver',kind:'bar',purity:999,grossWeight:weight,fineWeight:weight*.999,imageIndex:1,margin:12})),
+  goldBars:[31.1035,1,2.5,5,10,20,50,100].map((weight,index)=>({id:`gold-bar-${String(weight).replace('.','-')}g`,name:weight===31.1035?'Sztabka 1 oz':`Sztabka ${String(weight).replace('.',',')} g`,metal:'gold',kind:'bar',purity:999.9,grossWeight:weight,fineWeight:weight*.9999,imageIndex:0,margin:3})),
+  silverBars:[31.1035,50,100,250,500,1000].map((weight,index)=>({id:`silver-bar-${String(weight).replace('.','-')}g`,name:weight===31.1035?'Sztabka 1 oz':weight===1000?'Sztabka 1 kg':`Sztabka ${weight} g`,metal:'silver',kind:'bar',purity:999.9,grossWeight:weight,fineWeight:weight*.9999,imageIndex:1,margin:12})),
   platinumCoins:[],platinumBars:[],palladiumCoins:[],palladiumBars:[]
 };
+function silverCoinFallback(id,name,grossWeight,imageIndex,margin){return {id:`silver-${id}`,name,metal:'silver',kind:'coin',purity:999.9,grossWeight,fineWeight:Math.round(grossWeight*.9999*10000)/10000,imageIndex,margin,description:'Popularna srebrna moneta bulionowa próby Ag 999,9.'}}
 function coinFallbackFamily(slug,label,purity,oneOzGross,oneOzFine,familyIndex,margin,fractions){
   const names={1:'1 oz',.5:'1/2 oz',.25:'1/4 oz',.1:'1/10 oz',.05:'1/20 oz',.04:'1/25 oz'};
   return fractions.map(fraction=>({id:`gold-${slug}-${String(fraction).replace('.','-')}oz`,name:`${label} ${names[fraction]}`,metal:'gold',kind:'coin',purity,grossWeight:Math.round(oneOzGross*fraction*10000)/10000,fineWeight:Math.round(oneOzFine*fraction*10000)/10000,imageKey:slug,familyIndex,margin,description:`Złota moneta bulionowa ${label}, nominał ${names[fraction]}.`}));
