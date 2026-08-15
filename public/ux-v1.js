@@ -36,6 +36,8 @@ if(whatsappFloat&&!document.querySelector('.messenger-float')){
   whatsappFloat.insertAdjacentHTML('beforebegin',`<a class="messenger-float" href="https://m.me/puhsezam" target="_blank" rel="noopener" aria-label="Napisz do PUH Sezam na Messengerze"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-5 0-9 3.7-9 8.3 0 2.6 1.3 4.8 3.4 6.3V21l3.1-1.7c.8.2 1.7.3 2.5.3 5 0 9-3.7 9-8.3S17 3 12 3zm1 11-2.3-2.4L6.3 14l4.8-5.1 2.3 2.4 4.3-2.4L13 14z"/></svg></span><b>Napisz na Messengerze</b></a>`);
 }
 document.querySelectorAll('a[href*="wa.me/48601775146"]').forEach(link=>{link.href='https://wa.me/48601775146'});
+const whatsappIcon='<svg class="wa-logo" viewBox="0 0 24 24" aria-hidden="true"><path class="wa-ring" d="M20.2 11.8a8.2 8.2 0 0 1-12.1 7.3L3 20.6l1.4-4.9A8.2 8.2 0 1 1 20.2 11.8Z"/><path class="wa-phone" d="M8.15 7.25c.22-.22.56-.3.84-.17l1.05.5c.25.12.4.38.37.66l-.14 1.23a.7.7 0 0 1-.35.52l-.58.34a7.15 7.15 0 0 0 4.32 4.3l.34-.58a.7.7 0 0 1 .52-.34l1.23-.14c.28-.03.54.12.66.37l.5 1.05c.13.28.05.62-.17.84l-.62.62c-.55.55-1.36.77-2.11.57-3.58-.95-6.4-3.77-7.35-7.35-.2-.75.02-1.56.57-2.11l.62-.62Z"/></svg>';
+document.querySelectorAll('.whatsapp-float span,.footer-whatsapp b,.contact-whatsapp span,.quick-whatsapp i').forEach(mark=>{mark.innerHTML=whatsappIcon});
 
 const sellIcons=[
   `<svg viewBox="0 0 160 100" aria-hidden="true"><circle cx="48" cy="55" r="22"/><path d="M32 43l9-14h14l9 14-16 12zM41 29l7 26 7-26M32 43h32"/><path d="M88 18c1 34 10 55 27 55s26-21 27-55M102 69l13-18 13 18-13 13zM102 69h26"/></svg>`,
