@@ -27,6 +27,11 @@ document.querySelectorAll('[data-footer-metal]').forEach(link=>link.addEventList
 const footerCall=document.querySelector('.footer-call');
   if(footerCall&&!document.querySelector('.footer-social-actions'))footerCall.insertAdjacentHTML('afterend',`<div class="footer-social-actions"><a class="footer-whatsapp" href="https://wa.me/48601775146?text=Dzie%C5%84%20dobry%2C%20chc%C4%99%20zapyta%C4%87%20o%20wycen%C4%99." target="_blank" rel="noopener" aria-label="Napisz na WhatsApp"><b>WA</b><span>WhatsApp</span></a><a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v2H6v4h3v7h4v-7h3l1-4h-4V9c0-.7.3-1 1-1z"/></svg></a><a href="https://m.me/puhsezam" target="_blank" rel="noopener" aria-label="Napisz do PUH Sezam na Messengerze" title="Messenger — PUH Sezam"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-5 0-9 3.7-9 8.3 0 2.6 1.3 4.8 3.4 6.3V21l3.1-1.7c.8.2 1.7.3 2.5.3 5 0 9-3.7 9-8.3S17 3 12 3zm1 11-2.3-2.4L6.3 14l4.8-5.1 2.3 2.4 4.3-2.4L13 14z"/></svg></a></div>`);
 
+const whatsappFloat=document.querySelector('.whatsapp-float');
+if(whatsappFloat&&!document.querySelector('.messenger-float')){
+  whatsappFloat.insertAdjacentHTML('beforebegin',`<a class="messenger-float" href="https://m.me/puhsezam" target="_blank" rel="noopener" aria-label="Napisz do PUH Sezam na Messengerze"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-5 0-9 3.7-9 8.3 0 2.6 1.3 4.8 3.4 6.3V21l3.1-1.7c.8.2 1.7.3 2.5.3 5 0 9-3.7 9-8.3S17 3 12 3zm1 11-2.3-2.4L6.3 14l4.8-5.1 2.3 2.4 4.3-2.4L13 14z"/></svg></span><b>Napisz na Messengerze</b></a>`);
+}
+
 const sellIcons=[
   `<svg viewBox="0 0 160 100" aria-hidden="true"><circle cx="48" cy="55" r="22"/><path d="M32 43l9-14h14l9 14-16 12zM41 29l7 26 7-26M32 43h32"/><path d="M88 18c1 34 10 55 27 55s26-21 27-55M102 69l13-18 13 18-13 13zM102 69h26"/></svg>`,
   `<svg viewBox="0 0 160 100" aria-hidden="true"><circle cx="43" cy="51" r="30"/><circle cx="43" cy="51" r="24"/><path d="M43 31l4 9 8-4-3 9 9 3-8 6 4 9-10-3-4 12-4-12-10 3 4-9-8-6 9-3-3-9 8 4z"/><path d="M88 28h43l13 48H76zM95 38h29l8 28H85zM94 48h32M91 57h38"/></svg>`,
