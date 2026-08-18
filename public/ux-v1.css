@@ -35,6 +35,26 @@
   .product-picker-label{margin-top:12px}.product-empty{min-height:260px;aspect-ratio:auto}
 }
 
+/* Mocno widoczny alert o wyższej cenie za biżuterię. */
+.jewelry-premium-note,.jewelry-price-alert{
+  position:relative;
+  z-index:2;
+  border:2px solid #c99428!important;
+  background:#fff4cf!important;
+  color:#34270d!important;
+  font-weight:600;
+  transform-origin:center;
+  animation:jewelry-strong-pulse 1.45s ease-in-out infinite!important;
+}
+.jewelry-premium-note b,.jewelry-price-alert b{color:#17130a;font-weight:800}
+@keyframes jewelry-strong-pulse{
+  0%,100%{transform:scale(1);background:#fff4cf;box-shadow:0 0 0 0 rgba(201,148,40,.18),0 6px 18px rgba(112,78,12,.08)}
+  50%{transform:scale(1.012);background:#ffe8a3;box-shadow:0 0 0 9px rgba(201,148,40,.16),0 10px 28px rgba(112,78,12,.22)}
+}
+@media(max-width:700px){
+  .jewelry-premium-note,.jewelry-price-alert{animation-duration:1.25s!important}
+}
+
 /* Wyraźne rozdzielenie PLN i EUR. */
 .live-card-values{gap:20px}
 .live-card-values strong+strong{padding-left:20px;color:#456986}
