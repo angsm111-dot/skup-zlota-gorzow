@@ -64,6 +64,12 @@ if(calcLive&&!document.querySelector('.jewelry-premium-note'))calcLive.insertAdj
 const values=document.querySelector('.values');
 if(values&&!document.querySelector('.valuation-promises'))values.insertAdjacentHTML('afterend','<div class="valuation-promises"><span><b>Biżuteria w dobrym stanie</b> może być warta znacznie więcej niż złom</span><span><b>Gotówka od ręki</b> po zaakceptowaniu wyceny</span></div>');
 
+const firstProcessTitle=document.querySelector('[data-page="process"] .steps article:first-child h2');
+if(firstProcessTitle)firstProcessTitle.textContent='Przynosisz metal szlachetny';
+
+const pricesPageHead=document.querySelector('[data-page="prices"] .page-head');
+if(pricesPageHead&&!document.querySelector('.jewelry-price-alert'))pricesPageHead.insertAdjacentHTML('afterend','<div class="jewelry-price-alert"><span>◆</span><p><b>Masz biżuterię w dobrym stanie?</b> Otrzymasz za nią więcej niż w cenniku.</p><a href="#contact">Zapytaj o indywidualną wycenę →</a></div>');
+
 const panelHead=document.querySelector('.panel-head');
 if(panelHead&&!panelHead.querySelector('.panel-reference-price')){
   const reference=document.createElement('div');reference.className='panel-reference-price';
