@@ -53,12 +53,32 @@ const COMMONS_IMAGE_FILES={
   'denmark-20-kroner':'Two 20kr gold coins.jpg','netherlands-10-guilder':'Nederlandse 10 gulden, 1897 Nederland, 10 gulden, 1897, KOG-MP-1-5500.jpg','austria-1000-schilling':'1000 Schilling Babenberger Gold Bildseite.png',
   'britannia-100-pound':'Liberty & Britannia Gold Coin.jpg','south-africa-2-rand':'Springbock-1-Doppelbild.jpg'
 };
+const SILVER_COMMONS_BY_ID={
+  'silver-maple-leaf-1oz':'1-ounce Silver Canadian Maple Leaf MADE OF .9999% PURE SILVER.jpg',
+  'silver-krugerrand-1oz':'1 oz Silver Krugerrand 2017 detail.png',
+  'silver-britannia-1oz':'British Britannia Silver 2021 1Oz. .999 Fine Silver 2 Pounds English coin.jpg',
+  'silver-american-eagle-1oz':'American Silver Eagle, obverse, 2022.jpg',
+  'silver-kangaroo-1oz':'Obverse 2020 Australia 1 oz Silver Kangaroo.jpg',
+  'silver-philharmonic-1oz':'Austria 2009 Silver Philharmonic – Obverse.png'
+};
+const OFFICIAL_IMAGE_BY_KEY={
+  'american-eagle':'https://www.usmint.gov/content/dam/usmint/image-library/coins/2026/American-Eagle-Gold-Bullion-1oz-Obverse.jpg',
+  'american-buffalo':'https://www.usmint.gov/content/dam/usmint/image-library/coins/2026/American-Buffalo-Gold-Bullion-Obverse.jpg',
+  'philharmonic':'https://www.muenzeoesterreich.at/var/storage/images/6/8/5/6/8956586-5-ger-DE/bf29af3fe878-2026_1_1_oz_Au_NP_RS_2D.png'
+};
+const OFFICIAL_IMAGE_BY_ID={
+  'silver-american-eagle-1oz':'https://www.usmint.gov/content/dam/usmint/image-library/coins/2026/American-Eagle-Silver-Bullion-Obverse.jpg',
+  'silver-philharmonic-1oz':'https://www.muenzeoesterreich.at/var/storage/images/8/3/5/6/8956538-5-ger-DE/a5f28f9aa6f1-2026_1_1_oz_Ag_NP_RS_2D.png',
+  'silver-britannia-1oz':'https://www.royalmint.com/globalassets/_ecommerce/invest/launches/2026/britannia/products/silver-1-oz/bb26s1c---2026-bullion-britannia-1oz-silver-reverse-1500x1500-f3a2c67.jpg'
+};
 const commonsImageUrl=key=>COMMONS_IMAGE_FILES[key]?`https://commons.wikimedia.org/wiki/Special:Redirect/file/${encodeURIComponent(COMMONS_IMAGE_FILES[key])}?width=720`:'';
+const silverCommonsImageUrl=product=>SILVER_COMMONS_BY_ID[product.id]?`https://commons.wikimedia.org/wiki/Special:Redirect/file/${encodeURIComponent(SILVER_COMMONS_BY_ID[product.id])}?width=720`:'';
+const officialImageUrl=product=>OFFICIAL_IMAGE_BY_ID[product.id]||OFFICIAL_IMAGE_BY_KEY[product.imageKey]||'';
 const productMoney=value=>new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN'}).format(value);
 const productMoneyPair=value=>dualMoney(value);
 const productGroup=(metal,kind)=>(productGroups[`${metal}${kind==='coin'?'Coins':'Bars'}`]||[]).filter(product=>product.active!==false);
 const productPrice=product=>Number.isFinite(Number(product.price))?Number(product.price):metalRates[product.metal]*product.fineWeight*(1-Number(product.margin||0)/100);
-const productImageStyle=product=>{const licensed=commonsImageUrl(product.imageKey);return product.imageData?`--product-image:url('${product.imageData}');--product-size:contain;--product-position:center`:(licensed?`--product-image:url('${licensed}');--product-size:contain;--product-position:center`:(Number.isFinite(Number(product.familyIndex))?`--product-image:url('assets/gold-coin-families-v1.png');--product-size:600% auto;--product-position:${Number(product.familyIndex)/5*100}% center`:(product.kind==='coin'?`--product-image:url('assets/${product.metal}-coins-catalog.webp');--product-size:auto 200%;--product-position:${product.imageIndex/3*100}% center`:`--product-image:url('assets/bars-catalog.webp');--product-size:200% auto;--product-position:${product.metal==='gold'?0:100}% center`)))};
+const productImageStyle=product=>{const licensed=officialImageUrl(product)||commonsImageUrl(product.imageKey)||silverCommonsImageUrl(product);return product.imageData?`--product-image:url('${product.imageData}');--product-size:contain;--product-position:center`:(licensed?`--product-image:url('${licensed}');--product-size:contain;--product-position:center`:(Number.isFinite(Number(product.familyIndex))?`--product-image:url('assets/gold-coin-families-v1.png');--product-size:600% auto;--product-position:${Number(product.familyIndex)/5*100}% center`:(product.kind==='coin'?`--product-image:url('assets/${product.metal}-coins-catalog.webp');--product-size:auto 200%;--product-position:${product.imageIndex/3*100}% center`:`--product-image:url('assets/bars-catalog.webp');--product-size:200% auto;--product-position:${product.metal==='gold'?0:100}% center`)))};
 
 function productTabs(type){return `<div class="catalog-tabs" data-catalog-tabs="${type}"><button data-kind="purities" class="active">Rodzaj metalu</button><button data-kind="coin">Monety</button><button data-kind="bar">Sztabki</button></div>`}
 function productMetalButton(metal,symbol,label,active,kind){const empty=!productGroup(metal,kind).length;return `<button data-product-metal="${metal}" class="${active===metal?'active':''}" ${empty?'disabled title="Dodaj produkt w panelu administratora"':''}>${symbol} <span>${label}</span></button>`}
