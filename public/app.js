@@ -5,9 +5,19 @@ const METALS={
   palladium:{name:'Pallad',symbol:'Pd',factor:.82,purities:[999,950,850,500],fallback:138.4}
 };
 const API_SYMBOLS={silver:'XAG',platinum:'XPT',palladium:'XPD'},money=v=>new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN'}).format(v);
-let metalRates=Object.fromEntries(Object.entries(METALS).map(([k,v])=>[k,v.fallback])),changes={gold:0,silver:0,platinum:0,palladium:0},histories={},items=[],calcMetal='gold',activeMetal='gold',chartPeriod=30,zoomRange=null,dragStart=null;const DEFAULT_CALC_PURITY={gold:585,silver:925,platinum:950,palladium:950},CALC_KARATS={999:'24K',986:'23,7K',960:'23K',916:'22K',750:'18K',585:'14K',500:'12K',375:'9K',333:'8K'};
+let metalRates=Object.fromEntries(Object.entries(METALS).map(([k,v])=>[k,v.fallback])),changes={gold:0,silver:0,platinum:0,palladium:0},histories={},items=[],calcMetal='gold',activeMetal='gold',chartPeriod=30,zoomRange=null,dragStart=null,eurPln=4.3;const DEFAULT_CALC_PURITY={gold:585,silver:925,platinum:950,palladium:950},CALC_KARATS={999:'24K',986:'23,7K',960:'23K',916:'22K',750:'18K',585:'14K',500:'12K',375:'9K',333:'8K'};
+
+async function loadEurRate(){
+  try{
+    const response=await fetch('https://api.nbp.pl/api/exchangerates/rates/a/eur/?format=json',{cache:'no-store'});
+    if(response.ok){const data=await response.json(),rate=Number(data?.rates?.[0]?.mid);if(Number.isFinite(rate)&&rate>0)eurPln=rate}
+  }catch(error){console.warn('Kurs EUR/PLN chwilowo niedostępny — używam wartości zapasowej.',error)}
+  renderEuroPrice();
+}
+function renderEuroPrice(){document.querySelectorAll('[data-eur-price]').forEach(el=>{el.textContent=`${(metalRates.gold/eurPln).toFixed(2).replace('.',',')} €/g`})}
 
 async function loadRates(){
+  loadEurRate();
   try{
     const remote=await fetch(`/api/prices?t=${Date.now()}`,{cache:'no-store',headers:{accept:'application/json'}});
     if(remote.ok){
@@ -45,6 +55,7 @@ function renderAll(){
   document.querySelectorAll('[data-metal-price]').forEach(el=>el.textContent=`${metalRates[el.dataset.metalPrice].toFixed(2).replace('.',',')} zł/g`);
   document.querySelectorAll('[data-metal-trend]').forEach(el=>{const t=trendMarkup(el.dataset.metalTrend);el.textContent=t.label;el.className=t.cls});
   document.querySelectorAll('[data-nbp-price]').forEach(el=>el.textContent=`${metalRates.gold.toFixed(2).replace('.',',')} zł/g`);
+  renderEuroPrice();
   renderPriceTable();renderPurities();renderItems();drawChart();
   document.querySelector('#updated-at').textContent=`Aktualizacja: ${new Intl.DateTimeFormat('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date())}`;
 }
