@@ -50,6 +50,17 @@ document.querySelectorAll('.sell-visual').forEach((box,index)=>{if(sellIcons[ind
 const marketLabel=document.querySelector('.market-label b');
 if(marketLabel)marketLabel.textContent='Referencyjna cena metali';
 
+// Uncja jest zawsze wyliczana z aktualnej ceny 1 g otrzymanej z Workera.
+const updateHeroOuncePrice=()=>{
+  const gram=Number(typeof metalRates!=='undefined'?metalRates.gold:NaN),eur=Number(typeof eurPln!=='undefined'?eurPln:NaN),ounce=31.10;
+  if(!Number.isFinite(gram)||gram<=0)return;
+  document.querySelectorAll('[data-gold-ounce-pln]').forEach(el=>{el.textContent=new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN'}).format(gram*ounce)});
+  document.querySelectorAll('[data-gold-ounce-eur]').forEach(el=>{el.textContent=Number.isFinite(eur)&&eur>0?new Intl.NumberFormat('pl-PL',{style:'currency',currency:'EUR'}).format(gram*ounce/eur):'—'});
+};
+document.addEventListener('market-data-updated',updateHeroOuncePrice);
+setTimeout(updateHeroOuncePrice,100);
+setTimeout(updateHeroOuncePrice,1200);
+
 const valueIcons=[
   `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M11 24l8 8 18-19M24 5l16 7v11c0 10-6 17-16 21C14 40 8 33 8 23V12z"/></svg>`,
   `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 38h28M15 38V20h18v18M19 20l4-8h6l4 8M20 28h8M24 24v8"/></svg>`,
