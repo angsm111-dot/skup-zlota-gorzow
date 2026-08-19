@@ -40,12 +40,15 @@ const whatsappIcon='<svg class="wa-logo" viewBox="0 0 24 24" aria-hidden="true">
 document.querySelectorAll('.whatsapp-float span,.footer-whatsapp b,.contact-whatsapp span,.quick-whatsapp i').forEach(mark=>{mark.innerHTML=whatsappIcon});
 
 const sellIcons=[
-  `<svg viewBox="0 0 160 100" aria-hidden="true"><circle cx="48" cy="55" r="22"/><path d="M32 43l9-14h14l9 14-16 12zM41 29l7 26 7-26M32 43h32"/><path d="M88 18c1 34 10 55 27 55s26-21 27-55M102 69l13-18 13 18-13 13zM102 69h26"/></svg>`,
-  `<svg viewBox="0 0 160 100" aria-hidden="true"><circle cx="43" cy="51" r="30"/><circle cx="43" cy="51" r="24"/><path d="M43 31l4 9 8-4-3 9 9 3-8 6 4 9-10-3-4 12-4-12-10 3 4-9-8-6 9-3-3-9 8 4z"/><path d="M88 28h43l13 48H76zM95 38h29l8 28H85zM94 48h32M91 57h38"/></svg>`,
-  `<svg viewBox="0 0 160 100" aria-hidden="true"><path d="M25 18h38l7 18v30l-7 18H25l-7-18V36zM33 18V7h22v11M33 84v9h22v-9"/><circle cx="44" cy="51" r="18"/><path d="M44 39v13l9 5M82 78l34-49 10 7-35 49-12 5zM116 29l5-8 10 7-5 8M87 75l8 6"/><path d="M132 44h18v40h-18zM135 44v-7h12v7"/></svg>`,
-  `<svg viewBox="0 0 160 100" aria-hidden="true"><path d="M24 47h112l11 39H13zM13 86h134M31 39h98v9H31z"/><path d="M39 38l12-21h30L70 38zM76 38l14-23h32l-12 23zM51 28h22M92 26h22"/><circle cx="80" cy="67" r="10"/><path d="M80 60v14M73 67h14"/></svg>`
+  `<svg viewBox="0 0 160 100" aria-hidden="true"><path d="M23 17c5 32 15 52 33 59 18-7 28-27 33-59"/><path d="M31 19c4 25 12 42 25 48 13-6 21-23 25-48"/><path d="M45 67l11-16 11 16-11 14zM49 62h14M56 51v30"/><ellipse cx="116" cy="59" rx="25" ry="17"/><ellipse cx="116" cy="59" rx="16" ry="10"/><path d="M91 59c0-18 11-31 25-31s25 13 25 31"/></svg>`,
+  `<svg viewBox="0 0 160 100" aria-hidden="true"><circle cx="45" cy="51" r="31"/><circle cx="45" cy="51" r="25"/><path d="M45 32l4 9 9-4-4 9 9 5-9 5 4 10-9-4-4 10-4-10-9 4 4-10-9-5 9-5-4-9 9 4z"/><path d="M83 35l12-12h37l12 12-9 42H74zM91 38h43l-7 29H82zM98 48h28M95 57h34"/><path d="M111 23v44"/></svg>`,
+  `<svg viewBox="0 0 160 100" aria-hidden="true"><path d="M18 18h48l7 18v30l-7 18H18l-7-18V36zM29 18V7h26v11M29 84v9h26v-9"/><circle cx="42" cy="51" r="19"/><circle cx="42" cy="51" r="15"/><path d="M42 39v13l9 5M84 80l34-52 11 7-35 52-14 5zM118 28l5-8 11 7-5 8M88 77l9 6"/><path d="M133 47h17v37h-17zM136 47v-8h11v8M137 57h9"/></svg>`,
+  `<svg viewBox="0 0 160 100" aria-hidden="true"><path d="M14 47h132l9 39H5zM5 86h150M25 39h110v9H25z"/><path d="M32 38l10-17h30L62 38zM66 38l11-21h32L98 38zM101 38l9-15h26l-8 15z"/><path d="M42 29h22M79 27h21M112 30h18"/><circle cx="80" cy="68" r="11"/><path d="M80 61v14M73 68h14"/></svg>`
 ];
 document.querySelectorAll('.sell-visual').forEach((box,index)=>{if(sellIcons[index])box.innerHTML=sellIcons[index]});
+
+const marketLabel=document.querySelector('.market-label b');
+if(marketLabel)marketLabel.textContent='Referencyjna cena metali';
 
 const valueIcons=[
   `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M11 24l8 8 18-19M24 5l16 7v11c0 10-6 17-16 21C14 40 8 33 8 23V12z"/></svg>`,
@@ -73,9 +76,9 @@ if(pricesPageHead&&!document.querySelector('.jewelry-price-alert'))pricesPageHea
 const panelHead=document.querySelector('.panel-head');
 if(panelHead&&!panelHead.querySelector('.panel-reference-price')){
   const reference=document.createElement('div');reference.className='panel-reference-price';
-  reference.innerHTML='<small>Fine Gold — Spot Price</small><b>—</b><i>—</i>';
+  reference.innerHTML='<small>Cena referencyjna złota 999,9 / 1 g</small><div class="reference-values"><b>—</b><b>—</b></div><i>—</i>';
   panelHead.insertBefore(reference,panelHead.querySelector('#updated-at'));
-  const spotLabels={gold:'Fine Gold — Spot Price',silver:'Fine Silver — Spot Price',platinum:'Fine Platinum — Spot Price',palladium:'Fine Palladium — Spot Price'};
-  const updateReference=()=>{const metal=activeMetal||'gold',value=metalRates?.[metal],change=Number(changes?.[metal]||0),direction=change>0?'up':change<0?'down':'flat';reference.querySelector('small').textContent=spotLabels[metal]||'Spot Price';reference.querySelector('b').textContent=Number.isFinite(value)?`${value.toFixed(2).replace('.',',')} zł/g`:'—';reference.querySelector('i').className=direction;reference.querySelector('i').textContent=`${change>0?'↑':change<0?'↓':'→'} ${Math.abs(change).toFixed(2).replace('.',',')}%`};
+  const referenceLabels={gold:'Cena referencyjna złota 999,9 / 1 g',silver:'Cena referencyjna srebra 999,9 / 1 g',platinum:'Cena referencyjna platyny 999,9 / 1 g',palladium:'Cena referencyjna palladu 999,9 / 1 g'};
+  const updateReference=()=>{const metal=activeMetal||'gold',value=metalRates?.[metal],change=Number(changes?.[metal]||0),direction=change>0?'up':change<0?'down':'flat',values=reference.querySelectorAll('b');reference.querySelector('small').textContent=referenceLabels[metal]||'Referencyjna cena metalu';values[0].textContent=Number.isFinite(value)?`${value.toFixed(2).replace('.',',')} zł/g`:'—';values[1].textContent=Number.isFinite(value)?`${(value*31.10).toFixed(2).replace('.',',')} zł/oz`:'—';reference.querySelector('i').className=direction;reference.querySelector('i').textContent=`${change>0?'↑':change<0?'↓':'→'} ${Math.abs(change).toFixed(2).replace('.',',')}%`};
   document.addEventListener('market-data-updated',updateReference);document.addEventListener('click',event=>{if(event.target.closest('[data-metal-tab]'))setTimeout(updateReference)});setTimeout(updateReference);
 }
