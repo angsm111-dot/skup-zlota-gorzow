@@ -43,6 +43,7 @@
 /* Czytelny odstęp po oznaczeniu karatowym w kalkulatorze. */
 .purity-toggle .karat,.purity-menu .karat{margin-right:12px!important}
 .calc-live>span:first-child{margin-right:6px}
+.live-quote>small{font-size:10px!important}
 
 /* Nagłówek cennika: tytuł w jednej linii, ceny centralnie, data z licznikiem po prawej. */
 .panel-head{display:grid!important;grid-template-columns:minmax(185px,.85fr) minmax(310px,1.35fr) minmax(125px,.65fr);align-items:start;gap:22px}

@@ -18,7 +18,7 @@ async function loadEurRate(){
   if(typeof renderProductPrices==='function')renderProductPrices();
   if(typeof renderProductCalculator==='function')renderProductCalculator();
 }
-function renderEuroPrice(){const ounce=31.10;document.querySelectorAll('[data-eur-price]').forEach(el=>{el.textContent=`${(metalRates.gold/eurPln).toFixed(2).replace('.',',')} €/g`});document.querySelectorAll('[data-gold-ounce-pln]').forEach(el=>{el.textContent=money(metalRates.gold*ounce)});document.querySelectorAll('[data-gold-ounce-eur]').forEach(el=>{el.textContent=moneyEur(metalRates.gold*ounce)})}
+function renderEuroPrice(){const ounce=31.10;document.querySelectorAll('[data-eur-price]').forEach(el=>{el.textContent=`${(metalRates.gold/eurPln).toFixed(2).replace('.',',')} €`});document.querySelectorAll('[data-gold-ounce-pln]').forEach(el=>{el.textContent=money(metalRates.gold*ounce)});document.querySelectorAll('[data-gold-ounce-eur]').forEach(el=>{el.textContent=moneyEur(metalRates.gold*ounce)})}
 
 async function loadRates(){
   loadEurRate();
@@ -58,7 +58,7 @@ function trendMarkup(metal){const value=Number(changes[metal]||0);if(Math.abs(va
 function renderAll(){
   document.querySelectorAll('[data-metal-price]').forEach(el=>{const value=metalRates[el.dataset.metalPrice];el.textContent=`${value.toFixed(2).replace('.',',')} zł/g`});
   document.querySelectorAll('[data-metal-trend]').forEach(el=>{const t=trendMarkup(el.dataset.metalTrend);el.textContent=t.label;el.className=t.cls});
-  document.querySelectorAll('[data-nbp-price]').forEach(el=>el.textContent=`${metalRates.gold.toFixed(2).replace('.',',')} zł/g`);
+  document.querySelectorAll('[data-nbp-price]').forEach(el=>el.textContent=`${metalRates.gold.toFixed(2).replace('.',',')} zł`);
   renderEuroPrice();
   renderPriceTable();renderPurities();renderItems();drawChart();
   document.querySelector('#updated-at').textContent=`Aktualizacja: ${new Intl.DateTimeFormat('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date())}`;

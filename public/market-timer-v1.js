@@ -32,3 +32,11 @@ if(referenceLabel){
   tidyReferenceLabel();
   new MutationObserver(tidyReferenceLabel).observe(referenceLabel,{childList:true,characterData:true,subtree:true});
 }
+
+const pricePanelTitle=document.querySelector('#price-panel-title');
+if(pricePanelTitle){
+  const genitiveMetalNames={gold:'złota',silver:'srebra',platinum:'platyny',palladium:'palladu'};
+  const tidyPricePanelTitle=()=>{const expected=`Cennik skupu ${genitiveMetalNames[activeMetal]||'złota'}`;if(pricePanelTitle.textContent!==expected)pricePanelTitle.textContent=expected};
+  tidyPricePanelTitle();
+  new MutationObserver(tidyPricePanelTitle).observe(pricePanelTitle,{childList:true,characterData:true,subtree:true});
+}
