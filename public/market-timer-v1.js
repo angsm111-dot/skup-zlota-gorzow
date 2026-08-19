@@ -6,7 +6,10 @@ if(marketLabel){
   timer.innerHTML='<span>Aktualizacja za</span><strong>05:00</strong><small>Dane: —</small>';
   marketLabel.append(timer);
   const clock=timer.querySelector('strong'),stamp=timer.querySelector('small');
-  const priceHeading=document.querySelector('#price-panel-title')?.parentElement;
+  const updatedAt=document.querySelector('#updated-at');
+  const priceHeading=document.createElement('div');
+  priceHeading.className='panel-update-meta';
+  if(updatedAt){updatedAt.before(priceHeading);priceHeading.append(updatedAt)}
   const priceTimer=document.createElement('span');
   priceTimer.className='price-refresh-timer';
   priceTimer.innerHTML='Aktualizacja za <strong>05:00</strong>';
@@ -21,4 +24,11 @@ if(marketLabel){
     if(priceClock)priceClock.textContent=clock.textContent;
     if(left<=0){clock.textContent='Teraz…';if(priceClock)priceClock.textContent='Teraz…';marketRefreshDeadline=Date.now()+300000;try{await loadRates()}catch{} }
   },1000);
+}
+
+const referenceLabel=document.querySelector('.panel-reference-price small');
+if(referenceLabel){
+  const tidyReferenceLabel=()=>{const tidy=referenceLabel.textContent.replace(/\s*\/\s*1\s*g$/i,'');if(tidy!==referenceLabel.textContent)referenceLabel.textContent=tidy};
+  tidyReferenceLabel();
+  new MutationObserver(tidyReferenceLabel).observe(referenceLabel,{childList:true,characterData:true,subtree:true});
 }

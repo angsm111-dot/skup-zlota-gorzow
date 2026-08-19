@@ -40,6 +40,29 @@
 @media(max-width:700px){.price-panel{padding-left:18px!important;padding-right:18px!important}.price-panel th:last-child,.price-panel td:last-child{min-width:205px}.currency-heading,.price-panel td:last-child .dual-currency{grid-template-columns:minmax(86px,1fr) minmax(86px,1fr);gap:10px!important}.price-panel td:last-child .dual-currency{flex-direction:row;align-items:center}.mobile-market-bar>div{grid-template-columns:23px minmax(0,1fr)!important;gap:0 5px!important;min-width:0;padding-right:6px!important;margin-right:6px!important}.mobile-market-bar strong{display:block!important;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:9px!important}.mobile-market-bar i{grid-column:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mobile-market-bar>a{font-size:8px}.equipment-grid span{font-size:54px!important}}
 @media(max-width:370px){.price-panel th:last-child,.price-panel td:last-child{min-width:155px}.currency-heading,.price-panel td:last-child .dual-currency{grid-template-columns:1fr;gap:2px!important}.price-panel td:last-child .dual-currency>b+b{margin-top:2px}}
 
+/* Czytelny odstęp po oznaczeniu karatowym w kalkulatorze. */
+.purity-toggle .karat,.purity-menu .karat{margin-right:12px!important}
+.calc-live>span:first-child{margin-right:6px}
+
+/* Nagłówek cennika: tytuł w jednej linii, ceny centralnie, data z licznikiem po prawej. */
+.panel-head{display:grid!important;grid-template-columns:minmax(185px,.85fr) minmax(310px,1.35fr) minmax(125px,.65fr);align-items:start;gap:22px}
+.panel-head>div:first-child{min-width:0;align-self:center}
+.panel-head #price-panel-title{white-space:nowrap!important}
+.panel-reference-price{margin:0!important;min-width:0!important;display:grid!important;grid-template-columns:1fr auto!important;grid-template-rows:auto auto;column-gap:12px;row-gap:5px;align-items:center}
+.panel-reference-price small{grid-column:1;grid-row:1;white-space:nowrap}
+.panel-reference-price>i{grid-column:2!important;grid-row:1!important;white-space:nowrap}
+.panel-reference-price .reference-values{grid-column:1/-1!important;grid-row:2;display:flex;gap:12px;align-items:center}
+.panel-update-meta{display:flex!important;flex-direction:column;align-items:flex-start!important;gap:7px!important;justify-self:end;min-width:118px}
+.panel-update-meta #updated-at{order:1;margin:0!important;padding:0!important;border:0!important;line-height:1.45}
+.panel-update-meta .price-refresh-timer{order:2;margin:0!important}
+@media(max-width:720px){
+  .panel-head{grid-template-columns:1fr!important;gap:14px!important}
+  .panel-head>div:first-child{grid-row:1}
+  .panel-reference-price{grid-row:2;width:100%;padding:12px 0!important;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .panel-update-meta{grid-row:3;justify-self:start;width:100%;padding-top:0}
+  .panel-update-meta #updated-at{font-size:10px}
+}
+
 /* Cena referencyjna za gram i uncję */
 .live-card{min-width:370px}.live-price-row{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:10px;margin-top:7px}.live-price-row>span{font-size:10px;font-weight:800;color:#8d681e;text-transform:uppercase;letter-spacing:.08em}.live-price-row+.live-price-row{padding-top:7px;border-top:1px solid #ded8ca}.live-price-row .live-card-values{display:grid;grid-template-columns:minmax(112px,1fr) minmax(102px,1fr);gap:12px;margin:0}.live-price-row .live-card-values strong{font-size:16px!important}.live-price-row .live-card-values strong+strong{padding-left:12px}.panel-reference-price{grid-template-columns:minmax(170px,1fr) auto!important;min-width:310px!important}.panel-reference-price .reference-values{grid-column:1;display:flex;gap:12px;align-items:center}.panel-reference-price .reference-values b{white-space:nowrap}.panel-reference-price .reference-values b+b{padding-left:12px;border-left:1px solid #d9d3c6}.panel-reference-price>i{grid-column:2;grid-row:2}.features article>small,.sell-grid b{font-size:12px!important;line-height:1.5}.sell-visual svg{width:158px!important;height:98px!important;stroke-width:1.8!important}.sell-visual{background:linear-gradient(145deg,#fffaf0,#e4c77f)!important}
 @media(max-width:720px){.live-card{min-width:0;left:5vw!important;right:5vw!important}.live-price-row .live-card-values{grid-template-columns:minmax(105px,1fr) minmax(90px,1fr)}.live-price-row .live-card-values strong{font-size:14px!important}.panel-head{flex-wrap:wrap;gap:15px}.panel-reference-price{order:3;width:100%;min-width:0!important;margin-left:0;grid-template-columns:1fr auto!important}.panel-reference-price .reference-values{flex-wrap:wrap}.features article>small,.sell-grid b{font-size:12px!important}}
