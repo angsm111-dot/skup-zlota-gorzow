@@ -88,6 +88,8 @@ export default {
     const publicRoute=PUBLIC_ROUTES[url.pathname.replace(/\/$/,"")];
     if(publicRoute&&request.method==="GET")return Response.redirect(`${url.origin}/#${publicRoute}`,302);
     if(url.pathname==="/api/prices"&&request.method==="GET")return publicPrices(env,ctx);
+    if(url.pathname==="/api/admin/login"&&request.method==="POST")return adminLogin(request,env);
+    if(url.pathname==="/api/admin/logout"&&request.method==="POST")return adminLogout();
     if(url.pathname==="/api/admin/config"&&request.method==="GET")return adminGet(request,env);
     if(url.pathname==="/api/admin/config"&&request.method==="PUT")return adminPut(request,env);
     if(url.pathname==="/api/admin/refresh"&&request.method==="POST")return adminRefresh(request,env);
@@ -122,6 +124,14 @@ async function serveAsset(env,request){
   const response=await env.ASSETS.fetch(request),url=new URL(request.url),headers=new Headers(response.headers);
   const dynamicAsset=url.pathname==="/"||/\.(?:html|js|css)$/i.test(url.pathname);
   if(dynamicAsset){headers.set("cache-control","no-store, no-cache, must-revalidate, max-age=0");headers.set("cdn-cache-control","no-store");headers.set("cloudflare-cdn-cache-control","no-store");headers.set("pragma","no-cache");headers.set("expires","0")}
+  headers.set("x-content-type-options","nosniff");
+  headers.set("referrer-policy","strict-origin-when-cross-origin");
+  headers.set("permissions-policy","camera=(), microphone=(), geolocation=()");
+  if(url.pathname==="/admin"||url.pathname==="/admin/"||url.pathname==="/admin.html"){
+    headers.set("content-security-policy","default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
+    headers.set("x-frame-options","DENY");
+    headers.set("referrer-policy","no-referrer");
+  }
   return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
 }
 
@@ -216,9 +226,23 @@ async function fetchDefaultProviders(){
   return {fetchedAt:now(),provider:"NBP + Gold API",metals};
 }
 
-async function adminGet(request,env){if(!authorized(request,env))return json({error:"Brak dostępu"},401);return json(await getConfig(env));}
+async function adminLogin(request,env){
+  const ip=request.headers.get("cf-connecting-ip")||"unknown",key=`auth:fail:${ip}`,attempt=await readJson(env,key)||{count:0,blockedUntil:0};
+  if(Number(attempt.blockedUntil)>Date.now())return json({error:"Zbyt wiele prób. Spróbuj ponownie za kilkanaście minut."},429,{"retry-after":"900"});
+  const body=await request.json().catch(()=>({})),validUser=await secureEquals(String(body.username||""),String(env.ADMIN_USERNAME||"")),validPassword=await secureEquals(String(body.password||""),String(env.ADMIN_PASSWORD||""));
+  if(!env.ADMIN_USERNAME||!env.ADMIN_PASSWORD||!validUser||!validPassword){
+    const count=Number(attempt.count||0)+1,blockedUntil=count>=5?Date.now()+15*60*1000:0;
+    if(env.PRICE_STORE)await env.PRICE_STORE.put(key,JSON.stringify({count,blockedUntil}),{expirationTtl:900});
+    return json({error:"Nieprawidłowe dane logowania"},401);
+  }
+  if(env.PRICE_STORE)await env.PRICE_STORE.delete(key);
+  const session=await createAdminSession(env);
+  return json({ok:true},200,{"set-cookie":`admin_session=${session}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=1800`});
+}
+function adminLogout(){return json({ok:true},200,{"set-cookie":"admin_session=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0"})}
+async function adminGet(request,env){if(!await authorized(request,env))return json({error:"Brak dostępu"},401);return json(await getConfig(env));}
 async function adminPut(request,env){
-  if(!authorized(request,env))return json({error:"Brak dostępu"},401);
+  if(!await authorized(request,env))return json({error:"Brak dostępu"},401);
   const body=await request.json().catch(()=>null);if(!body?.metals)return json({error:"Nieprawidłowe dane"},400);
   const current=await getConfig(env);
   current.customProducts=sanitizeCustomProducts(body.customProducts);
@@ -226,8 +250,32 @@ async function adminPut(request,env){
   for(const list of Object.values(allProductGroups(current)))for(const product of list){const s=body.products?.[product.id];if(!s)continue;current.products[product.id]={margin:clamp(Number(s.margin),0,100),mode:s.mode==="manual"?"manual":"auto",manualPrice:s.mode==="manual"?Math.max(0,Number(s.manualPrice)||0):null};}
   current.updatedAt=now();current.updatedBy="panel";await writeJson(env,"config:pricing",current);return json({ok:true,config:current});
 }
-async function adminRefresh(request,env){if(!authorized(request,env))return json({error:"Brak dostępu"},401);return json({ok:true,market:await refreshMarket(env)});}
-function authorized(request,env){const token=request.headers.get("authorization")?.replace(/^Bearer\s+/i,"")||"";return Boolean(env.ADMIN_PASSWORD)&&token===env.ADMIN_PASSWORD}
+async function adminRefresh(request,env){if(!await authorized(request,env))return json({error:"Brak dostępu"},401);return json({ok:true,market:await refreshMarket(env)});}
+async function authorized(request,env){
+  const cookie=request.headers.get("cookie")||"",session=cookie.match(/(?:^|;\s*)admin_session=([^;]+)/)?.[1]||"";
+  return verifyAdminSession(session,env);
+}
+async function createAdminSession(env){
+  const payload=toBase64Url(JSON.stringify({exp:Date.now()+30*60*1000,nonce:crypto.randomUUID()}));
+  return `${payload}.${await signSession(payload,env)}`;
+}
+async function verifyAdminSession(session,env){
+  if(!session||!env.ADMIN_PASSWORD)return false;
+  const [payload,signature,...extra]=session.split(".");if(!payload||!signature||extra.length)return false;
+  if(!await secureEquals(signature,await signSession(payload,env)))return false;
+  try{return Number(JSON.parse(fromBase64Url(payload)).exp)>Date.now()}catch{return false}
+}
+async function signSession(value,env){
+  const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(String(env.ADMIN_SESSION_SECRET||env.ADMIN_PASSWORD)),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
+  return bytesToBase64Url(new Uint8Array(await crypto.subtle.sign("HMAC",key,new TextEncoder().encode(value))));
+}
+async function secureEquals(a,b){
+  const [da,db]=await Promise.all([a,b].map(value=>crypto.subtle.digest("SHA-256",new TextEncoder().encode(value))));
+  const aa=new Uint8Array(da),bb=new Uint8Array(db);let diff=aa.length^bb.length;for(let i=0;i<Math.max(aa.length,bb.length);i++)diff|=(aa[i%aa.length]||0)^(bb[i%bb.length]||0);return diff===0;
+}
+function toBase64Url(value){return bytesToBase64Url(new TextEncoder().encode(value))}
+function bytesToBase64Url(bytes){let binary="";for(const byte of bytes)binary+=String.fromCharCode(byte);return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"")}
+function fromBase64Url(value){const normalized=value.replace(/-/g,"+").replace(/_/g,"/");return decodeURIComponent(Array.from(atob(normalized+"=".repeat((4-normalized.length%4)%4))).map(char=>`%${char.charCodeAt(0).toString(16).padStart(2,"0")}`).join(""))}
 async function getConfig(env){const stored=await readJson(env,"config:pricing"),metals={},products={},customProducts=sanitizeCustomProducts(stored?.customProducts);for(const [key,meta] of Object.entries(METALS)){metals[key]={};for(const purity of meta.purities){const saved=stored?.metals?.[key]?.[purity];metals[key][purity]=saved?{margin:clamp(Number(saved.margin),0,100),mode:saved.mode==="manual"?"manual":"auto",manualPrice:saved.mode==="manual"?Math.max(0,Number(saved.manualPrice)||0):null}:{margin:DEFAULT_MARGINS[key][purity],mode:"auto",manualPrice:null}}}for(const list of Object.values(allProductGroups({customProducts})))for(const product of list){const saved=stored?.products?.[product.id];products[product.id]=saved?{margin:clamp(Number(saved.margin),0,100),mode:saved.mode==="manual"?"manual":"auto",manualPrice:saved.mode==="manual"?Math.max(0,Number(saved.manualPrice)||0):null}:{margin:product.defaultMargin??10,mode:"auto",manualPrice:null}}return {updatedAt:stored?.updatedAt||now(),updatedBy:stored?.updatedBy||"defaults",metals,products,customProducts};}
 
 function sanitizeCustomProducts(input){

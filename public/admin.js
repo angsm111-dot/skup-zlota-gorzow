@@ -1,10 +1,10 @@
 const names={gold:['Au','Złoto'],silver:['Ag','Srebro'],platinum:['Pt','Platyna'],palladium:['Pd','Pallad']};
-let token=sessionStorage.getItem('adminToken')||'',config=null,prices=null,active='gold',kind='purities',dirty=false;
+let config=null,prices=null,active='gold',kind='purities',dirty=false;
 const $=selector=>document.querySelector(selector),money=value=>new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN'}).format(value),number=value=>Number(value).toFixed(2).replace('.',',');
 
-async function api(path,options={}){const response=await fetch(path,{...options,cache:'no-store',headers:{'content-type':'application/json',authorization:`Bearer ${token}`,...options.headers}});if(!response.ok)throw Error(response.status===401?'Nieprawidłowe hasło':'Błąd serwera');return response.json()}
+async function api(path,options={}){const response=await fetch(path,{...options,credentials:'same-origin',cache:'no-store',headers:{'content-type':'application/json',...options.headers}});if(!response.ok){const data=await response.json().catch(()=>({}));throw Error(data.error||'Błąd serwera')}return response.json()}
 async function loadPrices(){return fetch(`/api/prices?t=${Date.now()}`,{cache:'no-store'}).then(response=>{if(!response.ok)throw Error('Nie udało się pobrać cen');return response.json()})}
-async function login(){token=$('#password').value;try{config=await api('/api/admin/config');sessionStorage.setItem('adminToken',token);prices=await loadPrices();$('#login').hidden=true;$('#panel').hidden=false;render()}catch(error){$('#login-error').textContent=error.message}}
+async function login(){const button=$('#login-btn');button.disabled=true;$('#login-error').textContent='Sprawdzanie…';try{await api('/api/admin/login',{method:'POST',body:JSON.stringify({username:$('#username').value,password:$('#password').value})});$('#password').value='';config=await api('/api/admin/config');prices=await loadPrices();$('#login').hidden=true;$('#panel').hidden=false;render()}catch(error){$('#login-error').textContent=error.message}finally{button.disabled=false}}
 
 function ensureKinds(){let bar=$('#admin-kinds');if(!bar){bar=document.createElement('div');bar.id='admin-kinds';bar.className='admin-kinds';$('#tabs').after(bar)}return bar}
 function groupName(){return `${active}${kind==='coins'?'Coins':'Bars'}`}
@@ -35,9 +35,10 @@ async function save(){const buttons=[$('#save'),$('#save-top')],labels=buttons.m
 function formatWeight(value){return value>=1000?`${value/1000} kg`:`${Number(value).toFixed(value<10?2:1).replace('.',',').replace(/,0$/,'')} g`}
 
 $('#login-btn').onclick=login;
+$('#username').onkeydown=event=>{if(event.key==='Enter')$('#password').focus()};
 $('#password').onkeydown=event=>{if(event.key==='Enter')login()};
 $('#save').onclick=$('#save-top').onclick=save;
-$('#logout').onclick=()=>{sessionStorage.clear();location.reload()};
+$('#logout').onclick=async()=>{await api('/api/admin/logout',{method:'POST'}).catch(()=>{});location.reload()};
 $('#refresh').onclick=async()=>{const button=$('#refresh'),label=button.textContent;button.disabled=true;button.textContent='Odświeżam…';$('#status').textContent='Pobieranie najnowszych cen…';try{await api('/api/admin/refresh',{method:'POST'});prices=await loadPrices();render();$('#status').textContent=`Ceny odświeżone: ${new Date().toLocaleTimeString('pl-PL')}`}catch(error){$('#status').textContent=`Nie udało się odświeżyć: ${error.message}`}finally{button.disabled=false;button.textContent=label}};
 $('#bulk-apply').onclick=()=>{const value=Number($('#bulk-margin').value);if(!Number.isFinite(value))return;if(kind==='purities')Object.values(config.metals[active]).forEach(setting=>setting.margin=value);else currentProducts().forEach(product=>config.products[product.id].margin=value);markDirty();render()};
-if(token){api('/api/admin/config').then(result=>{config=result;return loadPrices()}).then(result=>{prices=result;$('#login').hidden=true;$('#panel').hidden=false;render()}).catch(()=>sessionStorage.clear())}
+api('/api/admin/config').then(result=>{config=result;return loadPrices()}).then(result=>{prices=result;$('#login').hidden=true;$('#panel').hidden=false;render()}).catch(()=>{})
