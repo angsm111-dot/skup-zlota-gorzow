@@ -38,7 +38,7 @@ function decorateProductRows(){
     const product=currentProducts().find(item=>item.id===row.dataset.product);if(!product)return;
     const box=document.createElement('div');box.className='catalog-row-actions';
     const index=currentProducts().findIndex(item=>item.id===product.id),last=currentProducts().length-1;
-    box.innerHTML=`<button type="button" data-move-product="${product.id}" data-direction="up" ${index===0?'disabled':''} aria-label="Przesuń wyżej">↑ Wyżej</button><button type="button" data-move-product="${product.id}" data-direction="down" ${index===last?'disabled':''} aria-label="Przesuń niżej">↓ Niżej</button><button type="button" data-edit-product="${product.id}">Edytuj</button>${product.custom?`<button type="button" class="danger" data-delete-product="${product.id}">Usuń</button>`:''}`;
+    box.innerHTML=`<button type="button" data-move-product="${product.id}" data-direction="up" ${index===0?'disabled':''} aria-label="Przesuń wyżej">↑ Wyżej</button><button type="button" data-move-product="${product.id}" data-direction="down" ${index===last?'disabled':''} aria-label="Przesuń niżej">↓ Niżej</button><button type="button" data-edit-product="${product.id}">Edytuj</button><button type="button" class="danger" data-delete-product="${product.id}">Usuń</button>`;
     (row.querySelector('.admin-product-details')||row.cells[0]).append(box);
   });
   document.querySelectorAll('[data-edit-product]').forEach(button=>button.onclick=()=>openCatalogForm(currentProducts().find(item=>item.id===button.dataset.editProduct)));
@@ -94,6 +94,19 @@ function saveCatalogProduct(event){
   active=metal;kind=productKind==='coin'?'coins':'bars';markDirty();closeCatalogForm();render();
 }
 
-function deleteCatalogProduct(id){if(!confirm('Usunąć ten produkt?'))return;config.customProducts=(config.customProducts||[]).filter(item=>item.id!==id);for(const list of Object.values(prices.products)){const index=list.findIndex(item=>item.id===id);if(index>=0)list.splice(index,1)}delete config.products[id];markDirty();render()}
+function deleteCatalogProduct(id){
+  const product=currentProducts().find(item=>item.id===id);if(!product||!confirm(`Usunąć „${product.name}” z panelu, cennika i kalkulatora?`))return;
+  config.customProducts||=[];
+  if(product.custom){
+    config.customProducts=config.customProducts.filter(item=>item.id!==id);
+    delete config.products[id];
+  }else{
+    const hidden={...catalogOverride(product,product.order??currentProducts().indexOf(product)),active:false,custom:false,overridden:true};
+    const saved=config.customProducts.findIndex(item=>item.id===id);
+    saved>=0?config.customProducts[saved]={...config.customProducts[saved],...hidden}:config.customProducts.push(hidden);
+  }
+  for(const list of Object.values(prices.products)){const index=list.findIndex(item=>item.id===id);if(index>=0)list.splice(index,1)}
+  markDirty();document.querySelector('#status').textContent='Produkt usunięty. Opublikuj cennik, aby zapisać zmianę.';render();
+}
 const originalAdminRender=render;render=function(){originalAdminRender();renderCatalogManager()};
 
