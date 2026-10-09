@@ -41,7 +41,7 @@ function historicGoldCoinsFallback(){return [
 ]}
 let productGroups=structuredClone(PRODUCT_FALLBACK),priceKind='purities',priceProductMetal='gold',calcKind='purities',calcProductMetal='gold',calcSelectedProduct='';
 const COMMONS_IMAGE_FILES={
-  'krugerrand':'1 oz Krugerrand 2017 Bildseite.png','american-eagle':'American-Gold-Eagle.jpg','american-buffalo':'American buffalo proof vertical edit.jpg','maple-leaf':'Canadian Maple Leaf.png','philharmonic':'1 oz Vienna Philharmonic 2017 averse.png',
+  'krugerrand':'1 oz Krugerrand 2017 Bildseite.png','american-eagle':'American-Gold-Eagle.jpg','american-buffalo':'American buffalo proof vertical edit.jpg','maple-leaf':'Canadian Maple Leaf.png','chinese-panda':'30g China Panda Goldmünze 2016.png','philharmonic':'1 oz Vienna Philharmonic 2017 averse.png',
   'usa-20-dollar':'20 Dollars gold coin of the United States of America.jpg','usa-10-dollar':'United States Twenty-dollar Gold Piece MET DP170360.jpg','usa-5-dollar':'United States Twenty-dollar Gold Piece MET DP170360.jpg','usa-2-5-dollar':'United States Twenty-dollar Gold Piece MET DP170360.jpg',
   'russia-15-ruble':'15-1897 реверс.jpg','russia-10-ruble':'10 рублей 1899.jpg','russia-5-ruble':'Russian Empire-1899-Coin-5-Obverse.jpg','austria-4-ducat':'Golddukaten.png','austria-1-ducat':'Golddukaten.png',
   'germany-20-mark':'20 M Gold Kaiser Wilhelm I. von Preussen B 76.jpg','germany-10-mark':'20 M Gold Kaiser Wilhelm I. von Preussen B 76.jpg','germany-5-mark':'20 M Gold Kaiser Wilhelm I. von Preussen B 76.jpg',
