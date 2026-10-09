@@ -1,5 +1,5 @@
 const ADMIN_COMMONS_IMAGE_FILES={
-  'krugerrand':'1 oz Krugerrand 2017 Bildseite.png','american-eagle':'American-Gold-Eagle.jpg','american-buffalo':'American buffalo proof vertical edit.jpg','maple-leaf':'Canadian Maple Leaf.png','philharmonic':'1 oz Vienna Philharmonic 2017 averse.png',
+  'krugerrand':'1 oz Krugerrand 2017 Bildseite.png','american-eagle':'American-Gold-Eagle.jpg','american-buffalo':'American buffalo proof vertical edit.jpg','maple-leaf':'Canadian Maple Leaf.png','chinese-panda':'30g China Panda Goldmünze 2016.png','philharmonic':'1 oz Vienna Philharmonic 2017 averse.png',
   'usa-20-dollar':'20 Dollars gold coin of the United States of America.jpg','usa-10-dollar':'United States Twenty-dollar Gold Piece MET DP170360.jpg','usa-5-dollar':'United States Twenty-dollar Gold Piece MET DP170360.jpg','usa-2-5-dollar':'United States Twenty-dollar Gold Piece MET DP170360.jpg',
   'russia-15-ruble':'15-1897 реверс.jpg','russia-10-ruble':'10 рублей 1899.jpg','russia-5-ruble':'Russian Empire-1899-Coin-5-Obverse.jpg','austria-4-ducat':'Golddukaten.png','austria-1-ducat':'Golddukaten.png',
   'germany-20-mark':'20 M Gold Kaiser Wilhelm I. von Preussen B 76.jpg','germany-10-mark':'20 M Gold Kaiser Wilhelm I. von Preussen B 76.jpg','germany-5-mark':'20 M Gold Kaiser Wilhelm I. von Preussen B 76.jpg',
@@ -31,6 +31,7 @@ function adminProductPhoto(product){
   const label=String(product.name||'Produkt').replace(/[<>&\"]/g,'');
   if(product.imageData)return `<span class="admin-product-image" role="img" aria-label="${label}"><img class="admin-plain-image" src="${product.imageData}" alt=""></span>`;
   if(product.kind==='bar'&&!product.imageData)return `<span class="admin-product-image admin-bar-image admin-bar-${product.metal==='silver'?'silver':'gold'}" role="img" aria-label="${label}"><img src="assets/bars-catalog.webp" alt=""></span>`;
+  if(product.imageKey==='chinese-panda')return '<span class="admin-product-image admin-image-missing">brak zdjęcia</span>';
   const external=ADMIN_OFFICIAL_IMAGE_BY_ID[product.id]||ADMIN_OFFICIAL_IMAGE_BY_KEY[product.imageKey]||adminCommonsUrl(ADMIN_COMMONS_IMAGE_FILES[product.imageKey])||adminCommonsUrl(ADMIN_SILVER_COMMONS_BY_ID[product.id]);
   if(external)return `<span class="admin-product-image" role="img" aria-label="${label}"><img class="admin-plain-image" src="${external}" alt=""></span>`;
   if(Number.isFinite(Number(product.familyIndex)))return `<span class="admin-product-image admin-coin-sprite admin-family-sprite" role="img" aria-label="${label}"><img style="left:-${Number(product.familyIndex)*100}%" src="assets/gold-coin-families-v1.png" alt=""></span>`;
