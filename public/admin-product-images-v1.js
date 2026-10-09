@@ -27,5 +27,9 @@ function adminProductImageStyle(product){
   if(product.kind==='coin')return `background-image:url('assets/${product.metal}-coins-catalog.webp');background-size:auto 200%;background-position:${Number(product.imageIndex||0)/3*100}% center`;
   return `background-image:url('assets/bars-catalog.webp');background-size:200% auto;background-position:${product.metal==='gold'?0:100}% center`;
 }
-function adminProductPhoto(product){return `<span class="admin-product-image" style="${adminProductImageStyle(product)}" role="img" aria-label="${String(product.name||'Produkt').replace(/[<>&\"]/g,'')}"></span>`}
+function adminProductPhoto(product){
+  const label=String(product.name||'Produkt').replace(/[<>&\"]/g,'');
+  if(product.kind==='bar'&&!product.imageData)return `<span class="admin-product-image admin-bar-image admin-bar-${product.metal==='silver'?'silver':'gold'}" role="img" aria-label="${label}"><img src="assets/bars-catalog.webp" alt=""></span>`;
+  return `<span class="admin-product-image" style="${adminProductImageStyle(product)}" role="img" aria-label="${label}"></span>`;
+}
 
