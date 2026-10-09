@@ -106,14 +106,14 @@ async function publicPrices(env,ctx){
     market=await refreshMarket(env).catch(()=>market);
     if(!market)market=fallbackMarket();
   }
-  const config=await getConfig(env),metals={};
+  const config=await getConfig(env),dailyHistory=await readJson(env,"market:daily-history:v1")||{},metals={};
   for(const [key,meta] of Object.entries(METALS)){
     const spot=Number(market.metals[key]?.spot||meta.fallback),change=Number(market.metals[key]?.change||0),purities={};
     for(const purity of meta.purities){
       const setting=config.metals[key][purity],auto=spot*(purity/1000)*(1-setting.margin/100);
       purities[purity]={price:round(setting.mode==="manual"&&setting.manualPrice!==null?setting.manualPrice:auto),margin:setting.margin,mode:setting.mode};
     }
-    metals[key]={name:meta.name,symbol:meta.symbol,spot:round(spot),change,history:market.metals[key]?.history||[],purities};
+    metals[key]={name:meta.name,symbol:meta.symbol,spot:round(spot),change,history:mergeHistory(market.metals[key]?.history,dailyHistory[key]),purities};
   }
   const products={};
   for(const [group,list] of Object.entries(allProductGroups(config)))products[group]=list.map(product=>{const setting=config.products[product.id],spot=Number(market.metals[product.metal]?.spot||METALS[product.metal].fallback),marketValue=spot*product.fineWeight,auto=marketValue*(1-setting.margin/100);return {...product,marketValue:round(marketValue),price:round(setting.mode==="manual"&&setting.manualPrice!==null?setting.manualPrice:auto),margin:setting.margin,mode:setting.mode}});
@@ -144,6 +144,7 @@ async function refreshMarket(env){
   let anchor=storedAnchor;
   if(!anchor||anchor.date!==marketDate){const metals={};for(const [key,item] of Object.entries(market.metals||{}))metals[key]=Number(previous?.metals?.[key]?.spot||item.spot);anchor={date:marketDate,metals};await writeJson(env,"market:day-anchor",anchor)}
   for(const [key,item] of Object.entries(market.metals||{}))item.change=delta(item.spot,Number(anchor.metals?.[key]||item.spot));
+  await recordDailyHistory(env,market,marketDate);
   await writeJson(env,"market:latest",market);
   return market;
 }
@@ -172,9 +173,8 @@ async function fetchCustomProvider(env){
       const goldHistory=await fetch("https://api.nbp.pl/api/cenyzlota/last/90/?format=json").then(check).then(r=>r.json());
       metals.gold.history=goldHistory.map(x=>({date:x.data,value:Number(x.cena)}));
       metals.gold.change=delta(goldHistory.at(-1).cena,goldHistory.at(-2).cena);
-    }catch{metals.gold.history=indicativeHistory(metals.gold.spot,"gold")}
+    }catch{metals.gold.history=[]}
   }
-  for(const [key,item] of Object.entries(metals))if(item.history.length<2)item.history=indicativeHistory(item.spot,key);
   return {fetchedAt:now(),provider:"Invest Gold",metals};
 }
 
@@ -220,8 +220,8 @@ async function fetchDefaultProviders(){
   ]);
   const usdPln=Number(usd.rates[0].mid),metals={gold:{spot:Number(gold.at(-1).cena),change:delta(gold.at(-1).cena,gold.at(-2).cena),history:gold.map(x=>({date:x.data,value:Number(x.cena)}))}};
   await Promise.all(Object.entries(SYMBOLS).map(async([key,symbol])=>{
-    try{const d=await fetch(`https://api.gold-api.com/price/${symbol}`).then(check).then(r=>r.json());const spot=Number(d.price)*usdPln/31.1034768;metals[key]={spot,change:Number(d.changePercentage??d.change_percent??0),history:indicativeHistory(spot,key)}}
-    catch{metals[key]={spot:METALS[key].fallback,change:0,history:indicativeHistory(METALS[key].fallback,key)}}
+    try{const d=await fetch(`https://api.gold-api.com/price/${symbol}`).then(check).then(r=>r.json());const spot=Number(d.price)*usdPln/31.1034768;metals[key]={spot,change:Number(d.changePercentage??d.change_percent??0),history:[]}}
+    catch{metals[key]={spot:METALS[key].fallback,change:0,history:[]}}
   }));
   return {fetchedAt:now(),provider:"NBP + Gold API",metals};
 }
@@ -298,6 +298,29 @@ function allProductGroups(config){
 }
 async function readJson(env,key){if(!env.PRICE_STORE)return null;const v=await env.PRICE_STORE.get(key);return v?JSON.parse(v):null}
 async function writeJson(env,key,value){if(env.PRICE_STORE)await env.PRICE_STORE.put(key,JSON.stringify(value));}
-function fallbackMarket(){const metals={};for(const [k,v] of Object.entries(METALS))metals[k]={spot:v.fallback,change:0,history:indicativeHistory(v.fallback,k)};return {fetchedAt:now(),provider:"Dane zapasowe",metals}}
-function indicativeHistory(end,key){const seed={gold:1,silver:2,platinum:3,palladium:4}[key];return Array.from({length:90},(_,i)=>{const d=new Date();d.setDate(d.getDate()-(89-i));return {date:d.toISOString().slice(0,10),value:round(end*(1+Math.sin(i*.31+seed)*.018+Math.cos(i*.11)*.008))}})}
+async function recordDailyHistory(env,market,date){
+  if(!env.PRICE_STORE)return;
+  const stored=await readJson(env,"market:daily-history:v1")||{};
+  let changed=false;
+  for(const key of Object.keys(METALS)){
+    const spot=Number(market.metals?.[key]?.spot);
+    if(!Number.isFinite(spot)||spot<=0)continue;
+    const history=normalizeHistory(stored[key]?.length?stored[key]:market.metals[key]?.history);
+    if(history.some(point=>point.date===date)){stored[key]=history;continue}
+    stored[key]=[...history,{date,value:round(spot)}].slice(-730);
+    changed=true;
+  }
+  if(changed)await writeJson(env,"market:daily-history:v1",stored);
+}
+function normalizeHistory(input){
+  const byDate=new Map();
+  for(const point of Array.isArray(input)?input:[]){
+    const date=String(point?.date||point?.data||"").slice(0,10),value=Number(point?.value??point?.cena);
+    if(/^\d{4}-\d{2}-\d{2}$/.test(date)&&Number.isFinite(value)&&value>0)byDate.set(date,{date,value:round(value)});
+  }
+  return [...byDate.values()].sort((a,b)=>a.date.localeCompare(b.date)).slice(-730);
+}
+function mergeHistory(providerHistory,storedHistory){return normalizeHistory([...(Array.isArray(providerHistory)?providerHistory:[]),...(Array.isArray(storedHistory)?storedHistory:[])]).slice(-730)}
+function fallbackMarket(){const metals={};for(const [k,v] of Object.entries(METALS))metals[k]={spot:v.fallback,change:0,history:[]};return {fetchedAt:now(),provider:"Dane zapasowe",metals}}
 function check(r){if(!r.ok)throw new Error(String(r.status));return r}function round(v){return Math.round(v*100)/100}function clamp(v,a,b){return Math.max(a,Math.min(b,Number.isFinite(v)?v:a))}function delta(a,b){return b?(Number(a)-Number(b))/Number(b)*100:0}
+
