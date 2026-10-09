@@ -21,9 +21,10 @@ const ADMIN_OFFICIAL_IMAGE_BY_ID={
 const adminCommonsUrl=file=>file?`https://commons.wikimedia.org/wiki/Special:Redirect/file/${encodeURIComponent(file)}?width=240`:'';
 function adminProductImageStyle(product){
   if(product.imageData)return `background-image:url('${product.imageData}');background-size:contain;background-position:center`;
+  if(product.imageKey==='chinese-panda')return '';
+  if(Number.isFinite(Number(product.familyIndex)))return `background-image:url('assets/gold-coin-families-v1.png');background-size:600% auto;background-position:${Number(product.familyIndex)/5*100}% center`;
   const external=ADMIN_OFFICIAL_IMAGE_BY_ID[product.id]||ADMIN_OFFICIAL_IMAGE_BY_KEY[product.imageKey]||adminCommonsUrl(ADMIN_COMMONS_IMAGE_FILES[product.imageKey])||adminCommonsUrl(ADMIN_SILVER_COMMONS_BY_ID[product.id]);
   if(external)return `background-image:url('${external}');background-size:contain;background-position:center`;
-  if(Number.isFinite(Number(product.familyIndex)))return `background-image:url('assets/gold-coin-families-v1.png');background-size:600% auto;background-position:${Number(product.familyIndex)/5*100}% center`;
   if(product.kind==='coin')return `background-image:url('assets/${product.metal}-coins-catalog.webp');background-size:auto 200%;background-position:${Number(product.imageIndex||0)/3*100}% center`;
   return `background-image:url('assets/bars-catalog.webp');background-size:200% auto;background-position:${product.metal==='gold'?0:100}% center`;
 }
@@ -32,9 +33,9 @@ function adminProductPhoto(product){
   if(product.imageData)return `<span class="admin-product-image" role="img" aria-label="${label}"><img class="admin-plain-image" src="${product.imageData}" alt=""></span>`;
   if(product.kind==='bar'&&!product.imageData)return `<span class="admin-product-image admin-bar-image admin-bar-${product.metal==='silver'?'silver':'gold'}" role="img" aria-label="${label}"><img src="assets/bars-catalog.webp" alt=""></span>`;
   if(product.imageKey==='chinese-panda')return '<span class="admin-product-image admin-image-missing">brak zdjęcia</span>';
+  if(Number.isFinite(Number(product.familyIndex)))return `<span class="admin-product-image admin-coin-sprite admin-family-sprite" role="img" aria-label="${label}"><img style="left:-${Number(product.familyIndex)*100}%" src="assets/gold-coin-families-v1.png" alt=""></span>`;
   const external=ADMIN_OFFICIAL_IMAGE_BY_ID[product.id]||ADMIN_OFFICIAL_IMAGE_BY_KEY[product.imageKey]||adminCommonsUrl(ADMIN_COMMONS_IMAGE_FILES[product.imageKey])||adminCommonsUrl(ADMIN_SILVER_COMMONS_BY_ID[product.id]);
   if(external)return `<span class="admin-product-image" role="img" aria-label="${label}"><img class="admin-plain-image" src="${external}" alt=""></span>`;
-  if(Number.isFinite(Number(product.familyIndex)))return `<span class="admin-product-image admin-coin-sprite admin-family-sprite" role="img" aria-label="${label}"><img style="left:-${Number(product.familyIndex)*100}%" src="assets/gold-coin-families-v1.png" alt=""></span>`;
   return `<span class="admin-product-image admin-coin-sprite admin-catalog-sprite" role="img" aria-label="${label}"><img style="left:-${Number(product.imageIndex||0)*100}%" src="assets/${product.metal}-coins-catalog.webp" alt=""></span>`;
 }
 
