@@ -30,12 +30,9 @@ function adminProductImageStyle(product){
 }
 function adminProductPhoto(product){
   const label=String(product.name||'Produkt').replace(/[<>&\"]/g,'');
-  if(product.imageData)return `<span class="admin-product-image" role="img" aria-label="${label}"><img class="admin-plain-image" src="${product.imageData}" alt=""></span>`;
+  if(product.imageData)return `<span class="admin-product-image" style="${adminProductImageStyle(product)}" role="img" aria-label="${label}"></span>`;
   if(product.kind==='bar'&&!product.imageData)return `<span class="admin-product-image admin-bar-image admin-bar-${product.metal==='silver'?'silver':'gold'}" role="img" aria-label="${label}"><img src="assets/bars-catalog.webp" alt=""></span>`;
   if(product.imageKey==='chinese-panda')return '<span class="admin-product-image admin-image-missing">brak zdjęcia</span>';
-  if(Number.isFinite(Number(product.familyIndex)))return `<span class="admin-product-image admin-coin-sprite admin-family-sprite" role="img" aria-label="${label}"><img style="left:-${Number(product.familyIndex)*100}%" src="assets/gold-coin-families-v1.png" alt=""></span>`;
-  const external=ADMIN_OFFICIAL_IMAGE_BY_ID[product.id]||ADMIN_OFFICIAL_IMAGE_BY_KEY[product.imageKey]||adminCommonsUrl(ADMIN_COMMONS_IMAGE_FILES[product.imageKey])||adminCommonsUrl(ADMIN_SILVER_COMMONS_BY_ID[product.id]);
-  if(external)return `<span class="admin-product-image" role="img" aria-label="${label}"><img class="admin-plain-image" src="${external}" alt=""></span>`;
-  return `<span class="admin-product-image admin-coin-sprite admin-catalog-sprite" role="img" aria-label="${label}"><img style="left:-${Number(product.imageIndex||0)*100}%" src="assets/${product.metal}-coins-catalog.webp" alt=""></span>`;
+  return `<span class="admin-product-image" style="${adminProductImageStyle(product)}" role="img" aria-label="${label}"></span>`;
 }
 
