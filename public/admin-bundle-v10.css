@@ -106,8 +106,8 @@ td:nth-child(2) small { color: #777; line-height: 1.45; }
 .admin-product-image .admin-plain-image{display:block;width:100%!important;height:100%!important;object-fit:contain!important;background:#fff}
 .admin-coin-sprite{position:relative;overflow:hidden;background:#fff}
 .admin-coin-sprite img{position:absolute!important;top:50%;max-width:none!important;height:auto!important;object-fit:initial!important;transform:translateY(-50%)}
-.admin-family-sprite img{left:calc(var(--admin-sprite-index) * -100%);width:600%!important}
-.admin-catalog-sprite img{left:calc(var(--admin-sprite-index) * -100%);width:400%!important}
+.admin-family-sprite img{width:600%!important}
+.admin-catalog-sprite img{width:400%!important}
 .admin-product-photo span{padding:4px;color:#8b877d;font-size:9px;text-align:center}
 .admin-product-details>strong,.admin-product-details>small{display:block}
 .admin-product-details>small{margin-top:4px}
