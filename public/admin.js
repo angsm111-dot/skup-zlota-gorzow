@@ -8,7 +8,7 @@ async function login(){const button=$('#login-btn');button.disabled=true;$('#log
 
 function ensureKinds(){let bar=$('#admin-kinds');if(!bar){bar=document.createElement('div');bar.id='admin-kinds';bar.className='admin-kinds';$('#tabs').after(bar)}return bar}
 function groupName(){return `${active}${kind==='coins'?'Coins':'Bars'}`}
-function currentProducts(){return prices?.products?.[groupName()]||[]}
+function currentProducts(){return (prices?.products?.[groupName()]||[]).filter(product=>product.active!==false)}
 function render(){
   const tabs=$('#tabs');
   tabs.innerHTML=Object.entries(names).map(([key,name])=>`<button data-metal="${key}" class="${key===active?'active':''}">${name[0]}<span>${name[1]}</span></button>`).join('');
@@ -42,3 +42,4 @@ $('#logout').onclick=async()=>{await api('/api/admin/logout',{method:'POST'}).ca
 $('#refresh').onclick=async()=>{const button=$('#refresh'),label=button.textContent;button.disabled=true;button.textContent='Odświeżam…';$('#status').textContent='Pobieranie najnowszych cen…';try{await api('/api/admin/refresh',{method:'POST'});prices=await loadPrices();render();$('#status').textContent=`Ceny odświeżone: ${new Date().toLocaleTimeString('pl-PL')}`}catch(error){$('#status').textContent=`Nie udało się odświeżyć: ${error.message}`}finally{button.disabled=false;button.textContent=label}};
 $('#bulk-apply').onclick=()=>{const value=Number($('#bulk-margin').value);if(!Number.isFinite(value))return;if(kind==='purities')Object.values(config.metals[active]).forEach(setting=>setting.margin=value);else currentProducts().forEach(product=>config.products[product.id].margin=value);markDirty();render()};
 api('/api/admin/config').then(result=>{config=result;return loadPrices()}).then(result=>{prices=result;$('#login').hidden=true;$('#panel').hidden=false;render()}).catch(()=>{})
+
