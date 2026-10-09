@@ -128,7 +128,7 @@ async function serveAsset(env,request){
   headers.set("referrer-policy","strict-origin-when-cross-origin");
   headers.set("permissions-policy","camera=(), microphone=(), geolocation=()");
   if(url.pathname==="/admin"||url.pathname==="/admin/"||url.pathname==="/admin.html"){
-    headers.set("content-security-policy","default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
+    headers.set("content-security-policy","default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: https://commons.wikimedia.org https://upload.wikimedia.org https://www.usmint.gov https://www.muenzeoesterreich.at https://www.royalmint.com; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
     headers.set("x-frame-options","DENY");
     headers.set("referrer-policy","no-referrer");
   }
