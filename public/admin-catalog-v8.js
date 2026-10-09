@@ -38,13 +38,12 @@ function decorateProductRows(){
     const product=currentProducts().find(item=>item.id===row.dataset.product);if(!product)return;
     const box=document.createElement('div');box.className='catalog-row-actions';
     const index=currentProducts().findIndex(item=>item.id===product.id),last=currentProducts().length-1;
-    box.innerHTML=`<button type="button" data-move-product="${product.id}" data-direction="up" ${index===0?'disabled':''} aria-label="Przesuń wyżej">↑ Wyżej</button><button type="button" data-move-product="${product.id}" data-direction="down" ${index===last?'disabled':''} aria-label="Przesuń niżej">↓ Niżej</button><button type="button" data-edit-product="${product.id}">Edytuj</button>${product.custom?`<button type="button" class="danger" data-delete-product="${product.id}">Usuń</button>`:product.overridden?`<button type="button" data-restore-product="${product.id}">Przywróć domyślne</button>`:''}`;
+    box.innerHTML=`<button type="button" data-move-product="${product.id}" data-direction="up" ${index===0?'disabled':''} aria-label="Przesuń wyżej">↑ Wyżej</button><button type="button" data-move-product="${product.id}" data-direction="down" ${index===last?'disabled':''} aria-label="Przesuń niżej">↓ Niżej</button><button type="button" data-edit-product="${product.id}">Edytuj</button>${product.custom?`<button type="button" class="danger" data-delete-product="${product.id}">Usuń</button>`:''}`;
     (row.querySelector('.admin-product-details')||row.cells[0]).append(box);
   });
   document.querySelectorAll('[data-edit-product]').forEach(button=>button.onclick=()=>openCatalogForm(currentProducts().find(item=>item.id===button.dataset.editProduct)));
   document.querySelectorAll('[data-move-product]').forEach(button=>button.onclick=()=>moveCatalogProduct(button.dataset.moveProduct,button.dataset.direction));
   document.querySelectorAll('[data-delete-product]').forEach(button=>button.onclick=()=>deleteCatalogProduct(button.dataset.deleteProduct));
-  document.querySelectorAll('[data-restore-product]').forEach(button=>button.onclick=()=>restoreCatalogProduct(button.dataset.restoreProduct));
 }
 
 function catalogOverride(product,order){return {id:product.id,name:product.name,description:product.description||'',metal:product.metal,kind:product.kind,purity:product.purity,grossWeight:product.grossWeight,fineWeight:product.fineWeight,imageData:product.imageData||'',imageKey:product.imageKey||'',imageIndex:product.imageIndex||0,order,active:product.active!==false,custom:Boolean(product.custom),overridden:!product.custom,defaultMargin:product.defaultMargin??product.margin??10}}
@@ -96,6 +95,5 @@ function saveCatalogProduct(event){
 }
 
 function deleteCatalogProduct(id){if(!confirm('Usunąć ten produkt?'))return;config.customProducts=(config.customProducts||[]).filter(item=>item.id!==id);for(const list of Object.values(prices.products)){const index=list.findIndex(item=>item.id===id);if(index>=0)list.splice(index,1)}delete config.products[id];markDirty();render()}
-function restoreCatalogProduct(id){config.customProducts=(config.customProducts||[]).filter(item=>item.id!==id);markDirty();document.querySelector('#status').textContent='Przywrócono dane domyślne. Opublikuj cennik, aby zapisać zmianę.';render()}
-
 const originalAdminRender=render;render=function(){originalAdminRender();renderCatalogManager()};
+
