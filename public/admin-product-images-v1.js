@@ -29,7 +29,11 @@ function adminProductImageStyle(product){
 }
 function adminProductPhoto(product){
   const label=String(product.name||'Produkt').replace(/[<>&\"]/g,'');
+  if(product.imageData)return `<span class="admin-product-image" role="img" aria-label="${label}"><img class="admin-plain-image" src="${product.imageData}" alt=""></span>`;
   if(product.kind==='bar'&&!product.imageData)return `<span class="admin-product-image admin-bar-image admin-bar-${product.metal==='silver'?'silver':'gold'}" role="img" aria-label="${label}"><img src="assets/bars-catalog.webp" alt=""></span>`;
-  return `<span class="admin-product-image" style="${adminProductImageStyle(product)}" role="img" aria-label="${label}"></span>`;
+  const external=ADMIN_OFFICIAL_IMAGE_BY_ID[product.id]||ADMIN_OFFICIAL_IMAGE_BY_KEY[product.imageKey]||adminCommonsUrl(ADMIN_COMMONS_IMAGE_FILES[product.imageKey])||adminCommonsUrl(ADMIN_SILVER_COMMONS_BY_ID[product.id]);
+  if(external)return `<span class="admin-product-image" role="img" aria-label="${label}"><img class="admin-plain-image" src="${external}" alt=""></span>`;
+  if(Number.isFinite(Number(product.familyIndex)))return `<span class="admin-product-image admin-coin-sprite admin-family-sprite" style="--admin-sprite-index:${Number(product.familyIndex)}" role="img" aria-label="${label}"><img src="assets/gold-coin-families-v1.png" alt=""></span>`;
+  return `<span class="admin-product-image admin-coin-sprite admin-catalog-sprite" style="--admin-sprite-index:${Number(product.imageIndex||0)}" role="img" aria-label="${label}"><img src="assets/${product.metal}-coins-catalog.webp" alt=""></span>`;
 }
 
