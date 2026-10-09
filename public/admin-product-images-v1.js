@@ -22,6 +22,7 @@ const adminCommonsUrl=file=>file?`https://commons.wikimedia.org/wiki/Special:Red
 function adminProductImageStyle(product){
   if(product.imageData)return `background-image:url('${product.imageData}');background-size:contain;background-position:center`;
   if(product.imageKey==='chinese-panda')return '';
+  if(product.imageKey==='philharmonic')return `background-image:url('assets/gold-coins-catalog.webp');background-size:auto 200%;background-position:${2/3*100}% center`;
   if(Number.isFinite(Number(product.familyIndex)))return `background-image:url('assets/gold-coin-families-v1.png');background-size:600% auto;background-position:${Number(product.familyIndex)/5*100}% center`;
   const external=ADMIN_OFFICIAL_IMAGE_BY_ID[product.id]||ADMIN_OFFICIAL_IMAGE_BY_KEY[product.imageKey]||adminCommonsUrl(ADMIN_COMMONS_IMAGE_FILES[product.imageKey])||adminCommonsUrl(ADMIN_SILVER_COMMONS_BY_ID[product.id]);
   if(external)return `background-image:url('${external}');background-size:contain;background-position:center`;
@@ -33,9 +34,11 @@ function adminProductPhoto(product){
   if(product.imageData)return `<span class="admin-product-image" role="img" aria-label="${label}"><img class="admin-plain-image" src="${product.imageData}" alt=""></span>`;
   if(product.kind==='bar'&&!product.imageData)return `<span class="admin-product-image admin-bar-image admin-bar-${product.metal==='silver'?'silver':'gold'}" role="img" aria-label="${label}"><img src="assets/bars-catalog.webp" alt=""></span>`;
   if(product.imageKey==='chinese-panda')return '<span class="admin-product-image admin-image-missing">brak zdjęcia</span>';
+  if(product.imageKey==='philharmonic')return `<span class="admin-product-image admin-coin-sprite admin-catalog-sprite admin-catalog-index-2" role="img" aria-label="${label}"><img src="assets/gold-coins-catalog.webp" alt=""></span>`;
   if(Number.isFinite(Number(product.familyIndex)))return `<span class="admin-product-image admin-coin-sprite admin-family-sprite admin-family-index-${Number(product.familyIndex)}" role="img" aria-label="${label}"><img src="assets/gold-coin-families-v1.png" alt=""></span>`;
   const external=ADMIN_OFFICIAL_IMAGE_BY_ID[product.id]||ADMIN_OFFICIAL_IMAGE_BY_KEY[product.imageKey]||adminCommonsUrl(ADMIN_COMMONS_IMAGE_FILES[product.imageKey])||adminCommonsUrl(ADMIN_SILVER_COMMONS_BY_ID[product.id]);
   if(external)return `<span class="admin-product-image" role="img" aria-label="${label}"><img class="admin-plain-image" src="${external}" alt=""></span>`;
   return `<span class="admin-product-image admin-coin-sprite admin-catalog-sprite admin-catalog-index-${Math.max(0,Math.min(3,Number(product.imageIndex||0)))}" role="img" aria-label="${label}"><img src="assets/${product.metal}-coins-catalog.webp" alt=""></span>`;
 }
+document.addEventListener('error',event=>{const image=event.target;if(!(image instanceof HTMLImageElement)||!image.classList.contains('admin-plain-image'))return;const box=image.closest('.admin-product-image');if(!box)return;box.className='admin-product-image admin-image-missing';box.textContent='brak zdjęcia'},true);
 
